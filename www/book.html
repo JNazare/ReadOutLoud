@@ -1,0 +1,20 @@
+<ion-content>
+  <ion-slide-box on-slide-changed="slideHasChanged($index)" show-pager="false">
+    <ion-slide ng-repeat="page in pages">
+      <div class="list card">
+        <div class="item item-body">
+          <img class="full-image" src="{{page.image._downloadURL}}">
+          <p id="text_js">
+            {{page.text}}
+          </p>
+        </div>
+        <div class="item tabs tabs-secondary tabs-icon-left">
+          <a class="tab-item" href="#">
+            <i class="icon ion-volume-high"></i>
+            Listen
+          </a>
+        </div>
+      </div>
+    </ion-slide>
+  </ion-slide-box>
+</ion-content>

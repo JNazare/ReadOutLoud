@@ -1,0 +1,9 @@
+<ion-content>
+  <div class="list">
+    <ion-item class="item-thumbnail-left" ng-repeat="book in books" href="#/book/{{book._id}}">
+        <img src="{{book.cover_id._downloadURL}}">
+        <h2>{{book.title}}</h2>
+        <p>by {{book.author}}</p>
+    </ion-item>
+  </div>
+</ion-content>
