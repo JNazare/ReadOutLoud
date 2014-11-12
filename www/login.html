@@ -1,0 +1,24 @@
+<ion-header-bar class="bar-positive">
+    <h1 class="title"><a href="#/" class="no_decoration">Storyteller</a></h1>
+    <a href="#/settings">
+    	<button ng-if="activeuser" class="button button-clear icon ion-gear-a settings-button"></button>
+    </a>
+</ion-header-bar>
+<ion-content>
+	<form ng-submit="submit()" name="loginForm" ng-controller="LoginCtrl" class="login-form">
+		<div class="list list-inset">
+		  <label class="item item-input">
+		    <input name="email" ng-model="email" type="email" placeholder="Email" required>
+		  </label>
+		  <label class="item item-input">
+		    <input name="password" ng-model="password" type="password" placeholder="Password" required>
+		  </label>
+		  <button type="submit" class="button button-block button-stable">
+		    Login
+		  </button>
+		  <a href="#/signup" class="button button-clear button-balanced">
+			<strong> New? Sign up here. </strong>
+		  </a>
+		</div>
+	</form>
+</ion-content>

@@ -1,5 +1,81 @@
-/* Empty. Add your own CSS if you like */
+
+@font-face{ 
+	font-family: 'Chunky';
+	src: url('../fonts/chunky/chunky-webfont.eot');
+	src: url('../fonts/chunky/chunky-webfont.eot?#iefix') format('embedded-opentype'),
+	     url('../fonts/chunky/chunky-webfont.woff') format('woff'),
+	     url('../fonts/chunky/chunky-webfont.ttf') format('truetype'),
+	     url('../fonts/chunky/chunky-webfont.svg#webfont') format('svg');
+}
+
+@font-face{ 
+	font-family: 'Junction';
+	src: url('../fonts/junction/Junction-webfont.eot');
+	src: url('../fonts/junction/Junction-webfont.eot?#iefix') format('embedded-opentype'),
+	     url('../fonts/junction/Junction-webfont.woff') format('woff'),
+	     url('../fonts/junction/Junction-webfont.ttf') format('truetype'),
+	     url('../fonts/junction/Junction-webfont.svg#webfont') format('svg');
+}
 
 .no_decoration{
 	text-decoration: none;
+}
+
+/*.title{
+	font-family: Chunky;
+}*/
+
+.library-list:first-child{
+	border-top: none;
+}
+
+.book-avatar{
+	border-radius: 0px !important;
+}
+
+.reading-text{
+	font-size: 16px !important;
+	line-height: 150%;
+	padding-left: 10px;
+	padding-right: 10px; 
+}
+
+.page-card{
+	min-height: 60vh;
+	border-radius: 0px !important;
+	padding: 0px;
+	background-color: #f5f5f5;
+	padding-top: 15px;
+}
+
+.page-thumbnail-holder{
+	background-color: #ffffff;
+	border-bottom: 0px !important;
+	border-radius: 0px !important;
+	padding-bottom: 0px;
+	padding-top: 0px;
+	padding-right: 7px;
+	}
+
+.page-thumbnail-image{
+	/*border-bottom: 1px solid #ddd;*/
+	/*border-left: 1px solid #ddd;*/
+	width: 20vw;
+	float: right;
+	margin-right: -7px;
+	padding-right: 5px;
+	padding-top: 5px;
+	padding-bottom: 5px;
+}
+
+.audio-button{
+	position:absolute;
+	bottom: 0px;
+	margin-bottom: 0px !important;
+	color: #66cc33 !important;
+}
+
+.settings-button{
+	position:absolute;
+	right: 0px;
 }
