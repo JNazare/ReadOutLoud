@@ -120,7 +120,13 @@ app.controller "BookCtrl", [
         book_id = $location.path().split("/")[2]
         query = $kinvey.DataStore.get("books", book_id)
         query.then (book) ->
-            $scope.pages = book.pages
+            new_pages = []
+            angular.forEach book.pages, (page) ->
+                new_pages.push
+                  image: page.image
+                  text: page.text
+                  listed_text: page.text.split(" ")
+            $scope.pages = new_pages
             $ionicSlideBoxDelegate.update()
             $scope.clickMe = (clickEvent) ->
                 text = $scope.pages[clickEvent].text
@@ -129,14 +135,8 @@ app.controller "BookCtrl", [
                 utterance.rate = 0.1
                 window.speechSynthesis.speak(utterance)
                 return
-            $scope.addSpans = (string) ->
-                words = string.split(" ")
-                word_html = ""
-                i = 0
-                while i < words.length
-                    word_html += '<span class="highlight">' + words[i] + '</span> '
-                    i++
-                return $scope.result = $sce.trustAsHtml(word_html)
+            $scope.translateWord = (txt) ->
+                console.log txt
             return
         return
     return

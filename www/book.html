@@ -12,7 +12,10 @@
           <img class="page-thumbnail-image" src="{{page.image._downloadURL}}">
         </div>
         <div class="item item-text-wrap page-card">
-          <p id="text_js" class="reading-text" ng-bind-html="addSpans(page.text)">
+          <p id="text_js" class="reading-text">
+            <span ng-repeat="word in page.listed_text track by $index" ng-click="translateWord(word)">
+              {{word}}
+            </span>
           </p>
           <button id="audio_js" class="button button-full button-light item-icon-left audio-button" ng-click="clickMe($index)">
             <i class="icon ion-volume-medium"></i>

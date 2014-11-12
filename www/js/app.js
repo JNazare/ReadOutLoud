@@ -122,7 +122,17 @@
         book_id = $location.path().split("/")[2];
         query = $kinvey.DataStore.get("books", book_id);
         query.then(function(book) {
-          $scope.pages = book.pages;
+          var new_pages;
+          new_pages = [];
+          angular.forEach(book.pages, function(page) {
+            return new_pages.push({
+              image: page.image,
+              text: page.text,
+              listed_text: page.text.split(" ")
+            });
+          });
+          console.log(new_pages);
+          $scope.pages = new_pages;
           $ionicSlideBoxDelegate.update();
           $scope.clickMe = function(clickEvent) {
             var text, utterance;
@@ -132,16 +142,8 @@
             utterance.rate = 0.1;
             window.speechSynthesis.speak(utterance);
           };
-          $scope.addSpans = function(string) {
-            var i, word_html, words;
-            words = string.split(" ");
-            word_html = "";
-            i = 0;
-            while (i < words.length) {
-              word_html += '<span class="highlight">' + words[i] + '</span> ';
-              i++;
-            }
-            return $scope.result = $sce.trustAsHtml(word_html);
+          $scope.translateWord = function(txt) {
+            return console.log(txt);
           };
         });
       });
