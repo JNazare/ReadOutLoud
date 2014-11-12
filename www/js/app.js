@@ -111,13 +111,15 @@
   });
 
   app.controller("BookCtrl", [
-    "$scope", "$location", "$kinvey", "$ionicSlideBoxDelegate", "$sce", function($scope, $location, $kinvey, $ionicSlideBoxDelegate, $sce) {
+    "$scope", "$location", "$kinvey", "$ionicSlideBoxDelegate", "$sce", "$http", function($scope, $location, $kinvey, $ionicSlideBoxDelegate, $sce, $http) {
       var getuser;
       $scope.count = 0;
       getuser = $kinvey.User.me();
       getuser.then(function(activeUser) {
         var book_id, query;
         $scope.activeuser = activeUser;
+        $scope.translated_word = "";
+        $scope.selected_word = "";
         $ionicSlideBoxDelegate.update();
         book_id = $location.path().split("/")[2];
         query = $kinvey.DataStore.get("books", book_id);
@@ -131,9 +133,20 @@
               listed_text: page.text.split(" ")
             });
           });
-          console.log(new_pages);
           $scope.pages = new_pages;
           $ionicSlideBoxDelegate.update();
+          $scope.translateWord = function(txt) {
+            var link;
+            txt = txt.trim();
+            txt = txt.replace(/[\.,-\/#!$%\^&\*;:{}=\-_`~()]/g, "");
+            link = "https://translation-app.herokuapp.com/api/en/" + activeUser.nativelang + "/" + txt;
+            return $http.get(link).success(function(data, status, headers, config) {
+              $scope.translated_word = data;
+              $scope.selected_word = txt;
+            }).error(function(data, status, headers, config) {
+              console.log("error");
+            });
+          };
           $scope.clickMe = function(clickEvent) {
             var text, utterance;
             text = $scope.pages[clickEvent].text;
@@ -141,9 +154,6 @@
             utterance.lang = 'en-US';
             utterance.rate = 0.1;
             window.speechSynthesis.speak(utterance);
-          };
-          $scope.translateWord = function(txt) {
-            return console.log(txt);
           };
         });
       });

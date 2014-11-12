@@ -9,7 +9,19 @@
     <ion-slide ng-repeat="page in pages">
       <div ng-controller="BookCtrl" class="list card">
         <div class="item item-divider page-thumbnail-holder">
-          <img class="page-thumbnail-image" src="{{page.image._downloadURL}}">
+          <div class="row">
+            <div class="col col-center word">
+              {{selected_word}}
+              <i ng-if="selected_word" class="icon ion-arrow-swap"></i>
+              {{translated_word}}
+            </div>
+            <div class="col thumbnail-div">
+              <img class="page-thumbnail-image" src="{{page.image._downloadURL}}">
+            </div>
+          </div>
+          <!-- <div class="word selected_word"> {{selected_word}} </div>
+          <div class="word translated_word"> {{translated_word}} </div>
+          <img class="page-thumbnail-image" src="{{page.image._downloadURL}}"> -->
         </div>
         <div class="item item-text-wrap page-card">
           <p id="text_js" class="reading-text">

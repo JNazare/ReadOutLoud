@@ -57,15 +57,18 @@
 	padding-right: 7px;
 	}
 
+.thumbnail-div{
+	margin-right: -13px !important;
+	margin-top: -7px !important;
+	padding-bottom: 0px !important;
+	float: right;
+}
+
 .page-thumbnail-image{
 	/*border-bottom: 1px solid #ddd;*/
 	/*border-left: 1px solid #ddd;*/
 	width: 20vw;
 	float: right;
-	margin-right: -7px;
-	padding-right: 5px;
-	padding-top: 5px;
-	padding-bottom: 5px;
 }
 
 .audio-button{
@@ -78,4 +81,9 @@
 .settings-button{
 	position:absolute;
 	right: 0px;
+}
+
+.word{
+	font-weight: normal;
+	font-size: 14px;
 }
