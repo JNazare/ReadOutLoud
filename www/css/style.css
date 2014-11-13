@@ -87,3 +87,11 @@
 	font-weight: normal;
 	font-size: 14px;
 }
+
+span.activated{
+	color: #4a87ee;
+}
+
+.admin-link{
+	padding-left: 10px;
+}

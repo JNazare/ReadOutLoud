@@ -31,6 +31,14 @@ app.config(($routeProvider, $locationProvider) ->
         templateUrl: "book.html"
         controller: "BookCtrl"
 
+    $routeProvider.when "/admin",
+        templateUrl: "admin.html"
+        controller: "AdminCtrl"
+
+    $routeProvider.when "/new_book",
+        templateUrl: "new_book.html"
+        controller: "NewBookCtrl"
+
     $routeProvider.otherwise redirectTo: "/login"
     return
 )
@@ -70,6 +78,7 @@ app.controller("SignupCtrl", ($scope, $kinvey, $location) ->
 app.controller("SettingsCtrl", ($scope, $kinvey, $location) ->
     $scope.nativelang=""
     activeUser = $kinvey.getActiveUser()
+    $scope.activeuser = activeUser
     $scope.submit = ->
         if($scope.nativelang)
             activeUser.nativelang = $scope.nativelang
@@ -104,6 +113,75 @@ app.controller("HomeCtrl", ($scope, $kinvey, $location) ->
     return
 )
 
+app.controller("AdminCtrl", ($scope, $kinvey, $location, $route) ->
+    promise = $kinvey.init(
+        appKey: "kid_bJe2dFWlU"
+        appSecret: "a22c88799ce248298aff031b96946969"
+        sync:
+            enable: true
+    )
+    promise.then (activeUser) ->
+        if(activeUser)
+            $scope.activeuser = activeUser
+            query = $kinvey.DataStore.find("books")
+            query.then (books) ->
+                $scope.books = books
+                $scope.deleteBook = (book) ->
+                    if(book.pages)
+                        i = 0
+                        while i < book.pages.length
+                            delete_file_id = book.pages[i].image._id
+                            delete_file_promise = $kinvey.File.destroy(delete_file_id)
+                            i++
+                    delete_cover_promise = $kinvey.File.destroy(book.cover_id._id)
+                    delete_book_promise = $kinvey.DataStore.destroy('books', book._id)
+                    $route.reload()
+                return
+            return
+        else
+            $location.path("/login")
+            return
+        return
+    return
+)
+
+app.controller "NewBookCtrl", [
+  "$scope"
+  "$kinvey"
+  "fileUpload"
+  "$location"
+  ($scope, $kinvey, $fileUpload, $location) ->
+    promise = $kinvey.init(
+        appKey: "kid_bJe2dFWlU"
+        appSecret: "a22c88799ce248298aff031b96946969"
+        sync:
+            enable: true
+    )
+    promise.then (activeUser) ->
+        if(activeUser)
+            $scope.uploadFile = ->
+                cover_image = $scope.myFile
+                upload_promise = $kinvey.File.upload(cover_image,
+                  mimeType: "image/jpeg"
+                  size: cover_image.size
+                )
+                upload_promise.then (file) ->
+                    page_promise = $kinvey.DataStore.save("books",
+                      title: $scope.title
+                      author: $scope.author
+                      cover_id: 
+                        _type: "KinveyFile"
+                        _id: file._id
+                      created_by: activeUser._id
+                    )
+                    page_promise.then (book) ->
+                        $scope.activeuser = activeUser
+                        $location.path("/admin")
+                return
+        else
+            $location.path("/login")
+            return
+]
 
 app.controller "BookCtrl", [
   "$scope"
@@ -152,6 +230,38 @@ app.controller "BookCtrl", [
             return
         return
     return
+]
+
+app.directive "fileModel", [
+  "$parse"
+  ($parse) ->
+    return (
+      restrict: "A"
+      link: (scope, element, attrs) ->
+        model = $parse(attrs.fileModel)
+        modelSetter = model.assign
+        element.bind "change", ->
+          scope.$apply ->
+            modelSetter scope, element[0].files[0]
+            return
+          return
+        return
+    )
+]
+
+app.service "fileUpload", [
+  "$http"
+  ($http) ->
+    @uploadFileToUrl = (file, uploadUrl) ->
+      fd = new FormData()
+      fd.append "file", file
+      $http.post(uploadUrl, fd,
+        transformRequest: angular.identity
+        headers:
+          "Content-Type": `undefined`
+      ).success(->
+      ).error ->
+      return
 ]
 
 app.run ($ionicPlatform) ->

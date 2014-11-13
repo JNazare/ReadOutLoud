@@ -29,6 +29,14 @@
       templateUrl: "book.html",
       controller: "BookCtrl"
     });
+    $routeProvider.when("/admin", {
+      templateUrl: "admin.html",
+      controller: "AdminCtrl"
+    });
+    $routeProvider.when("/new_book", {
+      templateUrl: "new_book.html",
+      controller: "NewBookCtrl"
+    });
     $routeProvider.otherwise({
       redirectTo: "/login"
     });
@@ -72,6 +80,7 @@
     var activeUser;
     $scope.nativelang = "";
     activeUser = $kinvey.getActiveUser();
+    $scope.activeuser = activeUser;
     $scope.submit = function() {
       var promise;
       if ($scope.nativelang) {
@@ -109,6 +118,88 @@
       }
     });
   });
+
+  app.controller("AdminCtrl", function($scope, $kinvey, $location, $route) {
+    var promise;
+    promise = $kinvey.init({
+      appKey: "kid_bJe2dFWlU",
+      appSecret: "a22c88799ce248298aff031b96946969",
+      sync: {
+        enable: true
+      }
+    });
+    promise.then(function(activeUser) {
+      var query;
+      if (activeUser) {
+        $scope.activeuser = activeUser;
+        query = $kinvey.DataStore.find("books");
+        query.then(function(books) {
+          $scope.books = books;
+          $scope.deleteBook = function(book) {
+            var delete_book_promise, delete_cover_promise, delete_file_id, delete_file_promise, i;
+            if (book.pages) {
+              i = 0;
+              while (i < book.pages.length) {
+                delete_file_id = book.pages[i].image._id;
+                delete_file_promise = $kinvey.File.destroy(delete_file_id);
+                i++;
+              }
+            }
+            delete_cover_promise = $kinvey.File.destroy(book.cover_id._id);
+            delete_book_promise = $kinvey.DataStore.destroy('books', book._id);
+            return $route.reload();
+          };
+        });
+        return;
+      } else {
+        $location.path("/login");
+        return;
+      }
+    });
+  });
+
+  app.controller("NewBookCtrl", [
+    "$scope", "$kinvey", "fileUpload", "$location", function($scope, $kinvey, $fileUpload, $location) {
+      var promise;
+      promise = $kinvey.init({
+        appKey: "kid_bJe2dFWlU",
+        appSecret: "a22c88799ce248298aff031b96946969",
+        sync: {
+          enable: true
+        }
+      });
+      return promise.then(function(activeUser) {
+        if (activeUser) {
+          return $scope.uploadFile = function() {
+            var cover_image, upload_promise;
+            cover_image = $scope.myFile;
+            upload_promise = $kinvey.File.upload(cover_image, {
+              mimeType: "image/jpeg",
+              size: cover_image.size
+            });
+            upload_promise.then(function(file) {
+              var page_promise;
+              page_promise = $kinvey.DataStore.save("books", {
+                title: $scope.title,
+                author: $scope.author,
+                cover_id: {
+                  _type: "KinveyFile",
+                  _id: file._id
+                },
+                created_by: activeUser._id
+              });
+              return page_promise.then(function(book) {
+                $scope.activeuser = activeUser;
+                return $location.path("/admin");
+              });
+            });
+          };
+        } else {
+          $location.path("/login");
+        }
+      });
+    }
+  ]);
 
   app.controller("BookCtrl", [
     "$scope", "$location", "$kinvey", "$ionicSlideBoxDelegate", "$sce", "$http", function($scope, $location, $kinvey, $ionicSlideBoxDelegate, $sce, $http) {
@@ -157,6 +248,40 @@
           };
         });
       });
+    }
+  ]);
+
+  app.directive("fileModel", [
+    "$parse", function($parse) {
+      return {
+        restrict: "A",
+        link: function(scope, element, attrs) {
+          var model, modelSetter;
+          model = $parse(attrs.fileModel);
+          modelSetter = model.assign;
+          element.bind("change", function() {
+            scope.$apply(function() {
+              modelSetter(scope, element[0].files[0]);
+            });
+          });
+        }
+      };
+    }
+  ]);
+
+  app.service("fileUpload", [
+    "$http", function($http) {
+      return this.uploadFileToUrl = function(file, uploadUrl) {
+        var fd;
+        fd = new FormData();
+        fd.append("file", file);
+        $http.post(uploadUrl, fd, {
+          transformRequest: angular.identity,
+          headers: {
+            "Content-Type": undefined
+          }
+        }).success(function() {}).error(function() {});
+      };
     }
   ]);
 
