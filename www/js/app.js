@@ -37,6 +37,14 @@
       templateUrl: "new_book.html",
       controller: "NewBookCtrl"
     });
+    $routeProvider.when("/edit/:book_id", {
+      templateUrl: "edit.html",
+      controller: "EditCtrl"
+    });
+    $routeProvider.when("/new_page/:book_id/:after", {
+      templateUrl: "new_page.html",
+      controller: "NewPageCtrl"
+    });
     $routeProvider.otherwise({
       redirectTo: "/login"
     });
@@ -201,6 +209,64 @@
     }
   ]);
 
+  app.controller("NewPageCtrl", [
+    "$scope", "$kinvey", "fileUpload", "$location", function($scope, $kinvey, $fileUpload, $location) {
+      var promise;
+      promise = $kinvey.init({
+        appKey: "kid_bJe2dFWlU",
+        appSecret: "a22c88799ce248298aff031b96946969",
+        sync: {
+          enable: true
+        }
+      });
+      return promise.then(function(activeUser) {
+        if (activeUser) {
+          return $scope.uploadFile = function() {
+            var cover_image, upload_promise;
+            cover_image = $scope.myFile;
+            upload_promise = $kinvey.File.upload(cover_image, {
+              mimeType: "image/jpeg",
+              size: cover_image.size
+            });
+            upload_promise.then(function(file) {
+              var book_id, new_page, query;
+              console.log('uploaded file');
+              new_page = {
+                text: $scope.text,
+                image: {
+                  _type: "KinveyFile",
+                  _id: file._id
+                }
+              };
+              book_id = $location.path().split("/")[2];
+              query = $kinvey.DataStore.get("books", book_id);
+              return query.then(function(book) {
+                var page_index, page_promise;
+                console.log('fetched book');
+                if ($scope.at_end) {
+                  book.pages.push(new_page);
+                  page_promise = $kinvey.DataStore.save("books", book);
+                  return page_promise.then(function(book) {
+                    return $location.path("/edit/" + book_id);
+                  });
+                } else {
+                  page_index = $location.path().split("/")[3];
+                  book.pages.splice(page_index, 0, new_page);
+                  page_promise = $kinvey.DataStore.save("books", book);
+                  return page_promise.then(function(book) {
+                    return $location.path("/edit/" + book_id);
+                  });
+                }
+              });
+            });
+          };
+        } else {
+          $location.path("/login");
+        }
+      });
+    }
+  ]);
+
   app.controller("BookCtrl", [
     "$scope", "$location", "$kinvey", "$ionicSlideBoxDelegate", "$sce", "$http", function($scope, $location, $kinvey, $ionicSlideBoxDelegate, $sce, $http) {
       var getuser;
@@ -245,6 +311,68 @@
             utterance.lang = 'en-US';
             utterance.rate = 0.1;
             window.speechSynthesis.speak(utterance);
+          };
+        });
+      });
+    }
+  ]);
+
+  app.controller("EditCtrl", [
+    "$scope", "$location", "$kinvey", "$ionicSlideBoxDelegate", "$sce", "$http", "fileUpload", "$route", "$filter", function($scope, $location, $kinvey, $ionicSlideBoxDelegate, $sce, $http, $fileUpload, $route, $filter) {
+      var getuser;
+      getuser = $kinvey.User.me();
+      getuser.then(function(activeUser) {
+        var book_id, query;
+        $scope.activeuser = activeUser;
+        $ionicSlideBoxDelegate.update();
+        book_id = $location.path().split("/")[2];
+        query = $kinvey.DataStore.get("books", book_id);
+        query.then(function(book) {
+          $scope.book_id = book._id;
+          $scope.pages = book.pages;
+          $ionicSlideBoxDelegate.update();
+          $scope.uploadFile = function(page_index) {
+            var delete_page_image_promise, page_image, updated_page_promise, upload_promise;
+            page_image = $scope.myFile;
+            if (page_image) {
+              console.log(book.pages[page_index].image._id);
+              delete_page_image_promise = $kinvey.File.destroy(book.pages[page_index].image._id);
+              upload_promise = $kinvey.File.upload(page_image, {
+                mimeType: "image/jpeg",
+                size: page_image.size
+              });
+              return upload_promise.then(function(file) {
+                var updated_page_promise;
+                book.pages[page_index].image = {
+                  _id: file._id,
+                  _type: "KinveyFile"
+                };
+                book.pages[page_index].text = $scope.text;
+                console.log(book.pages[page_index]);
+                updated_page_promise = $kinvey.DataStore.save('books', book);
+                return updated_page_promise.then(function(page) {
+                  console.log('done');
+                  return $route.reload();
+                });
+              });
+            } else {
+              book.pages[page_index].text = $scope.text;
+              updated_page_promise = $kinvey.DataStore.save('books', book);
+              return updated_page_promise.then(function(page) {
+                console.log('done');
+                return $route.reload();
+              });
+            }
+          };
+          $scope.deletePage = function(page_index) {
+            var delete_page_image_promise, delete_page_promise;
+            delete_page_image_promise = $kinvey.File.destroy(book.pages[page_index].image._id);
+            book.pages.splice(page_index, 1);
+            delete_page_promise = $kinvey.DataStore.save('books', book);
+            return delete_page_promise.then(function(page) {
+              console.log('done');
+              return $route.reload();
+            });
           };
         });
       });

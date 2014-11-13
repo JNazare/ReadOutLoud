@@ -1,0 +1,32 @@
+<ion-header-bar class="bar-positive">
+    <h1 class="title"><a href="#/" class="no_decoration">Storyteller</a></h1>
+    <a href="#/settings">
+    	<button ng-if="activeuser" class="button button-clear icon ion-gear-a settings-button"></button>
+    </a>
+</ion-header-bar>
+<ion-content>
+	<form name="newPageForm" ng-controller="NewPageCtrl" class="new-page-form">
+		<div class="list list-inset">
+		  <div class="list">
+			  <label class="item item-input">
+			    <input name="text" ng-model="text" type="text" placeholder="Insert text..." required>
+			  </label>
+			  <label class="item item-input">
+			  	<input type="file" file-model="myFile" required>
+			  </label>
+			  <label class="item item-toggle">
+			  Insert at End
+			  <label class="toggle">
+				   <input type="checkbox" ng-model="at_end">
+				   <div class="track">
+				     <div class="handle"></div>
+				   </div>
+			  </label>
+			  </label>
+		  </div>
+		  <button ng-click="uploadFile()" class="button button-block button-stable">
+		    Add Page
+		  </button>
+		</div>
+	</form>
+</ion-content>
