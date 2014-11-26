@@ -31,7 +31,7 @@
             Save
           </button>
         </div>
-        <a class="no-decoration" href="#/new_page/{{book_id}}/{{$index}}">
+        <a class="no_decoration" href="#/new_page/{{book_id}}/{{$index}}">
           <button class="button button-balanced button-clear add-page-button">
               <i class="icon ion-plus"></i>
           </button>
@@ -39,8 +39,8 @@
       </div>
     </ion-slide>
     <a ng-if="pages.length==0" class="no-decoration" href="#/new_page/{{book_id}}/0">
-      <button class="button button-balanced button-clear add-page-button">
-          <i class="icon ion-plus"></i>
+      <button class="button button-balanced button-full col-middle">
+          Add New Page 
       </button>
     </a>
   </ion-slide-box>

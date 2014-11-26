@@ -7,6 +7,9 @@
 <ion-content>
   <div class="list">
     <ion-item class="library-list" ng-repeat="book in books">
+        <button class="button button-assertive button-clear delete-book-button" ng-click="deleteBook(book)">
+          Delete
+        </button>
         <h3>{{book.title}}</h3>
         <p>by {{book.author}}</p>
         <a class="no_decoration" href="#/edit/{{book._id}}">
@@ -14,9 +17,6 @@
             Edit Book
           </button>
         </a>
-        <button class="button button-assertive" ng-click="deleteBook(book)">
-          Delete
-        </button>
     </ion-item>
     <a class="no_decoration" href="#/new_book">
         <button class="button button-full button-balanced">

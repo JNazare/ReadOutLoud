@@ -12,7 +12,8 @@
 			    <input name="text" ng-model="text" type="text" placeholder="Insert text..." required>
 			  </label>
 			  <label class="item item-input">
-			  	<input type="file" file-model="myFile" required>
+			  	<!-- <input type="file" file-model="myFile" required> -->
+			  	<input type="file" file-model="myFile"  accept="image/*" resize-max-height="300" resize-max-width="250" resize-quality="0.5" />
 			  </label>
 			  <label class="item item-toggle">
 			  Insert at End

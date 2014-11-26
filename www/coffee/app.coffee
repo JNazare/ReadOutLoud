@@ -207,6 +207,7 @@ app.controller "NewPageCtrl", [
         if(activeUser)
             $scope.uploadFile = ->
                 cover_image = $scope.myFile
+                console.log cover_image
                 upload_promise = $kinvey.File.upload(cover_image,
                   mimeType: "image/jpeg"
                   size: cover_image.size
@@ -246,7 +247,8 @@ app.controller "BookCtrl", [
   "$ionicSlideBoxDelegate"
   "$sce"
   "$http"
-  ($scope, $location, $kinvey, $ionicSlideBoxDelegate, $sce, $http) ->
+  "$ionicPopup"
+  ($scope, $location, $kinvey, $ionicSlideBoxDelegate, $sce, $http, $ionicPopup) ->
     $scope.count = 0
     getuser = $kinvey.User.me()
     getuser.then (activeUser) ->
@@ -283,6 +285,12 @@ app.controller "BookCtrl", [
                 utterance.rate = 0.1
                 window.speechSynthesis.speak(utterance)
                 return
+            $scope.showPopup = (image) ->
+                console.log image
+                tempate_string = '<img src="' + image + '" width="100%">'
+                alertPopup = $ionicPopup.alert(
+                  template: tempate_string
+                )
             return
         return
     return

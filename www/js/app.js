@@ -224,6 +224,7 @@
           return $scope.uploadFile = function() {
             var cover_image, upload_promise;
             cover_image = $scope.myFile;
+            console.log(cover_image);
             upload_promise = $kinvey.File.upload(cover_image, {
               mimeType: "image/jpeg",
               size: cover_image.size
@@ -268,7 +269,7 @@
   ]);
 
   app.controller("BookCtrl", [
-    "$scope", "$location", "$kinvey", "$ionicSlideBoxDelegate", "$sce", "$http", function($scope, $location, $kinvey, $ionicSlideBoxDelegate, $sce, $http) {
+    "$scope", "$location", "$kinvey", "$ionicSlideBoxDelegate", "$sce", "$http", "$ionicPopup", function($scope, $location, $kinvey, $ionicSlideBoxDelegate, $sce, $http, $ionicPopup) {
       var getuser;
       $scope.count = 0;
       getuser = $kinvey.User.me();
@@ -311,6 +312,14 @@
             utterance.lang = 'en-US';
             utterance.rate = 0.1;
             window.speechSynthesis.speak(utterance);
+          };
+          $scope.showPopup = function(image) {
+            var alertPopup, tempate_string;
+            console.log(image);
+            tempate_string = '<img src="' + image + '" width="100%">';
+            return alertPopup = $ionicPopup.alert({
+              template: tempate_string
+            });
           };
         });
       });

@@ -17,14 +17,6 @@
 	     url('../fonts/junction/Junction-webfont.svg#webfont') format('svg');
 }
 
-.no_decoration{
-	text-decoration: none;
-}
-
-/*.title{
-	font-family: Chunky;
-}*/
-
 .library-list:first-child{
 	border-top: none;
 }
@@ -38,6 +30,10 @@
 	line-height: 150%;
 	padding-left: 10px;
 	padding-right: 10px; 
+}
+
+a.no_decoration{
+	text-decoration: none;
 }
 
 .page-card{
@@ -141,4 +137,10 @@ span.activated{
 
 .edit-card{
 	box-shadow: none;
+}
+
+.delete-book-button{
+	float: right;
+	margin-right: -10px;
+	margin-top: -20px;
 }
