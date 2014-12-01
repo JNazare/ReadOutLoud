@@ -87,15 +87,26 @@ app.controller("SettingsCtrl", ($scope, $kinvey, $location) ->
     $scope.nativelang=""
     activeUser = $kinvey.getActiveUser()
     $scope.activeuser = activeUser
+    languages = {"es": "Spanish", "zh": "Chinese", "ar": "Arabic", "pt": "Portuguese", "fr": "French", "de" : "German"}
+    $scope.currentLanguage = languages[activeUser.nativelang]
+    delete languages[activeUser.nativelang]
+    $scope.languages = languages
+    $scope.currentSpeed = activeUser.speed
     $scope.submit = ->
         if($scope.nativelang)
             activeUser.nativelang = $scope.nativelang
             promise = $kinvey.User.update(activeUser)
             promise.then (activeUser) ->
-                $scope.activeuser = activeUser
+                $location.path("/")
+            return
+        if($scope.activeuser.speed)
+            activeUser.speed = $scope.activeuser.speed
+            promise = $kinvey.User.update(activeUser)
+            promise.then (activeUser) ->
                 $location.path("/")
                 return
             return
+        $location.path("/")
     return
     )
 

@@ -85,20 +85,41 @@
   });
 
   app.controller("SettingsCtrl", function($scope, $kinvey, $location) {
-    var activeUser;
+    var activeUser, languages;
     $scope.nativelang = "";
     activeUser = $kinvey.getActiveUser();
     $scope.activeuser = activeUser;
+    languages = {
+      "es": "Spanish",
+      "zh": "Chinese",
+      "ar": "Arabic",
+      "pt": "Portuguese",
+      "fr": "French",
+      "de": "German"
+    };
+    $scope.currentLanguage = languages[activeUser.nativelang];
+    delete languages[activeUser.nativelang];
+    $scope.languages = languages;
+    $scope.currentSpeed = activeUser.speed;
     $scope.submit = function() {
       var promise;
       if ($scope.nativelang) {
         activeUser.nativelang = $scope.nativelang;
         promise = $kinvey.User.update(activeUser);
         promise.then(function(activeUser) {
-          $scope.activeuser = activeUser;
+          return $location.path("/");
+        });
+        return;
+      }
+      if ($scope.activeuser.speed) {
+        activeUser.speed = $scope.activeuser.speed;
+        promise = $kinvey.User.update(activeUser);
+        promise.then(function(activeUser) {
           $location.path("/");
         });
+        return;
       }
+      return $location.path("/");
     };
   });
 

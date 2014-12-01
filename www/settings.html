@@ -7,21 +7,25 @@
 <ion-content>
 	<form ng-submit="submit()" name="settingsForm" ng-controller="SettingsCtrl" class="settings-form">
 		<div class="list list-inset">
-		  <div class="list">
-			  <label class="item item-input item-select">
-			    <div class="input-label">
-			      Native Language
-			    </div>
-			    <select name="nativelang" ng-model="nativelang" required>
-			      <option value="es" selected>Spanish</option>
-			      <option value="zh">Chinese</option>
-			      <option value="ar">Arabic</option>
-			      <option value="pt">Portuguese</option>
-			      <option value="fr">French</option>
-			      <option value="de">German</option>
-			    </select>
-			  </label>
+	  	  <div class="item item-divider">
+		    Speed of Voice
 		  </div>
+	  	  <div class="item range range-positive">
+		    <i class="icon ion-arrow-down-a"></i>
+		    <input type="range" name="volume" ng-model="activeuser.speed" min="0" max="1" value="{{activeuser.speed}}" step="0.01" >
+		    <i class="icon ion-arrow-up-a"></i>
+		  </div>
+		  <div class="item item-divider">
+		    Native Language
+		  </div>
+		  <label class="item item-input item-select">
+		    <div class="input-label">
+		      {{currentLanguage}}
+		    </div>
+		    <select name="nativelang" ng-model="nativelang" required>
+		      <option ng-repeat="(val, name) in languages" value="{{val}}" selected>{{name}}</option>
+		    </select>
+		  </label>
 		  <button type="submit" class="button button-block button-stable">
 		    Save
 		  </button>
