@@ -25,7 +25,7 @@
         </div>
         <div class="item item-text-wrap page-card">
           <p id="text_js" class="reading-text">
-            <span ng-repeat="word in page.listed_text track by $index" ng-click="translateWord(word)">
+            <span ng-repeat="word in page.listed_text track by $index" ng-click="translateWord(word, $index)"  ng-class="{ 'selected-class-name': $index == selectedIndex }">
               {{word}}
             </span>
           </p>

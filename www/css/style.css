@@ -84,8 +84,12 @@ a.no_decoration{
 	font-size: 14px;
 }
 
-span.activated{
+/*span.activated{
 	color: #4a87ee;
+}*/
+
+.selected-class-name {
+  color: #4a87ee;
 }
 
 .admin-link{

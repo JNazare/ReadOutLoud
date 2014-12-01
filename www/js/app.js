@@ -291,7 +291,16 @@
 
   app.controller("BookCtrl", [
     "$scope", "$location", "$kinvey", "$ionicSlideBoxDelegate", "$sce", "$http", "$ionicPopup", function($scope, $location, $kinvey, $ionicSlideBoxDelegate, $sce, $http, $ionicPopup) {
-      var getuser;
+      var getuser, speechLang;
+      speechLang = {
+        "es": "es-mx",
+        "zh": "zh-cn",
+        "ar": "ar-eg",
+        "pt": "pt-br",
+        "fr": "fr-fr",
+        "de": "de-de"
+      };
+      $scope.selectedIndex = -1;
       $scope.count = 0;
       getuser = $kinvey.User.me();
       getuser.then(function(activeUser) {
@@ -314,14 +323,21 @@
           });
           $scope.pages = new_pages;
           $ionicSlideBoxDelegate.update();
-          $scope.translateWord = function(txt) {
+          $scope.translateWord = function(txt, $index) {
             var link;
+            $scope.selectedIndex = $index;
             txt = txt.trim();
-            txt = txt.replace(/[\.,-\/#!$%\^&\*;:{}=\-_`~()]/g, "");
+            txt = txt.replace(/["\.,-\/#!$%\^&\*;:{}=\-_`~()]/g, "");
             link = "https://translation-app.herokuapp.com/api/en/" + activeUser.nativelang + "/" + txt;
             return $http.get(link).success(function(data, status, headers, config) {
+              var utterance;
               $scope.translated_word = data;
               $scope.selected_word = txt;
+              utterance = new SpeechSynthesisUtterance();
+              utterance.rate = 0.1;
+              utterance.text = data;
+              utterance.lang = speechLang[activeUser.nativelang];
+              window.speechSynthesis.speak(utterance);
             }).error(function(data, status, headers, config) {
               console.log("error");
             });
@@ -329,7 +345,8 @@
           $scope.clickMe = function(clickEvent) {
             var text, utterance;
             text = $scope.pages[clickEvent].text;
-            utterance = new SpeechSynthesisUtterance(text);
+            utterance = new SpeechSynthesisUtterance();
+            utterance.text = text;
             utterance.lang = 'en-US';
             utterance.rate = 0.1;
             window.speechSynthesis.speak(utterance);

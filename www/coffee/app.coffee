@@ -260,6 +260,8 @@ app.controller "BookCtrl", [
   "$http"
   "$ionicPopup"
   ($scope, $location, $kinvey, $ionicSlideBoxDelegate, $sce, $http, $ionicPopup) ->
+    speechLang = {"es": "es-mx", "zh": "zh-cn", "ar": "ar-eg", "pt": "pt-br", "fr": "fr-fr", "de" : "de-de"}
+    $scope.selectedIndex = -1;
     $scope.count = 0
     getuser = $kinvey.User.me()
     getuser.then (activeUser) ->
@@ -278,22 +280,29 @@ app.controller "BookCtrl", [
                   listed_text: page.text.split(" ")
             $scope.pages = new_pages
             $ionicSlideBoxDelegate.update()
-            $scope.translateWord = (txt) ->
+            $scope.translateWord = (txt, $index) ->
+                $scope.selectedIndex = $index
                 txt = txt.trim()
-                txt = txt.replace(/[\.,-\/#!$%\^&\*;:{}=\-_`~()]/g,"")
+                txt = txt.replace(/["\.,-\/#!$%\^&\*;:{}=\-_`~()]/g,"")
                 link = "https://translation-app.herokuapp.com/api/en/"+activeUser.nativelang+"/"+txt
                 $http.get(link).success((data, status, headers, config) ->
                   $scope.translated_word = data
                   $scope.selected_word = txt
+                  utterance = new SpeechSynthesisUtterance()
+                  utterance.rate = 0.1 # activeUser.speed
+                  utterance.text = data
+                  utterance.lang = speechLang[activeUser.nativelang]
+                  window.speechSynthesis.speak(utterance)
                   return
                 ).error (data, status, headers, config) ->
                   console.log "error"
                   return
             $scope.clickMe = (clickEvent) ->
                 text = $scope.pages[clickEvent].text
-                utterance = new SpeechSynthesisUtterance(text)
+                utterance = new SpeechSynthesisUtterance()
+                utterance.text = text
                 utterance.lang = 'en-US'
-                utterance.rate = 0.1
+                utterance.rate = 0.1 # activeUser.speed
                 window.speechSynthesis.speak(utterance)
                 return
             $scope.showPopup = (image) ->
