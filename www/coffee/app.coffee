@@ -47,6 +47,10 @@ app.config(($routeProvider, $locationProvider) ->
         templateUrl: "new_page.html"
         controller: "NewPageCtrl"
 
+    $routeProvider.when "/lost_login",
+        templateUrl: "lost_login.html"
+        controller: "LostLoginCtrl"
+
     $routeProvider.otherwise redirectTo: "/login"
     return
 )
@@ -59,8 +63,23 @@ app.controller("LoginCtrl", ($scope, $kinvey, $location) ->
             username: $scope.email
             password: $scope.password
         )
-        promise.then (activeUser) ->
+        promise.then ((activeUser) ->
+            console.log 'logging in'
             $scope.activeuser = activeUser
+            $location.path("/")
+            return),
+        (error) ->
+            $scope.flash = "Sorry! Incorrect username / password"
+    return
+    )
+
+app.controller("LostLoginCtrl", ($scope, $kinvey, $location) ->
+    $scope.email=""
+    $scope.password=""
+    $scope.flash = ""
+    $scope.submit = ->
+        promise = $kinvey.User.resetPassword( $scope.email )
+        promise.then () ->
             $location.path("/")
             return
     return
@@ -75,6 +94,8 @@ app.controller("SignupCtrl", ($scope, $kinvey, $location) ->
             username: $scope.email
             password: $scope.password
             nativelang: $scope.nativelang
+            email: $scope.email
+            speed: 0.1
         )
         promise.then (activeUser) ->
             $scope.activeuser = activeUser
@@ -83,7 +104,8 @@ app.controller("SignupCtrl", ($scope, $kinvey, $location) ->
     return
     )
 
-app.controller("SettingsCtrl", ($scope, $kinvey, $location) ->
+app.controller("SettingsCtrl", ($scope, $kinvey, $location, $rootScope) ->
+    $scope.flash = ""
     $scope.nativelang=""
     activeUser = $kinvey.getActiveUser()
     $scope.activeuser = activeUser
@@ -97,16 +119,16 @@ app.controller("SettingsCtrl", ($scope, $kinvey, $location) ->
             activeUser.nativelang = $scope.nativelang
             promise = $kinvey.User.update(activeUser)
             promise.then (activeUser) ->
-                $location.path("/")
+                $rootScope.back()
             return
         if($scope.activeuser.speed)
             activeUser.speed = $scope.activeuser.speed
             promise = $kinvey.User.update(activeUser)
             promise.then (activeUser) ->
-                $location.path("/")
+                $rootScope.back()
                 return
             return
-        $location.path("/")
+        $rootScope.back()
     return
     )
 
@@ -260,9 +282,9 @@ app.controller "BookCtrl", [
   "$http"
   "$ionicPopup"
   ($scope, $location, $kinvey, $ionicSlideBoxDelegate, $sce, $http, $ionicPopup) ->
-    speechLang = {"es": "es-mx", "zh": "zh-cn", "ar": "ar-eg", "pt": "pt-br", "fr": "fr-fr", "de" : "de-de"}
     $scope.selectedIndex = -1;
     $scope.count = 0
+    word_count = 0
     getuser = $kinvey.User.me()
     getuser.then (activeUser) ->
         $scope.activeuser = activeUser
@@ -288,22 +310,20 @@ app.controller "BookCtrl", [
                 $http.get(link).success((data, status, headers, config) ->
                   $scope.translated_word = data
                   $scope.selected_word = txt
-                  utterance = new SpeechSynthesisUtterance()
-                  utterance.rate = 0.1 # activeUser.speed
-                  utterance.text = data
-                  utterance.lang = speechLang[activeUser.nativelang]
-                  window.speechSynthesis.speak(utterance)
+                  speech1 = speakWord(txt, 'en')
+                  speech2 = speakWord(data, activeUser.nativelang)
+                  window.speechSynthesis.speak(speech1)
+                  window.speechSynthesis.speak(speech2)
                   return
                 ).error (data, status, headers, config) ->
                   console.log "error"
                   return
             $scope.clickMe = (clickEvent) ->
+                ct = 0
                 text = $scope.pages[clickEvent].text
-                utterance = new SpeechSynthesisUtterance()
-                utterance.text = text
-                utterance.lang = 'en-US'
-                utterance.rate = 0.1 # activeUser.speed
-                window.speechSynthesis.speak(utterance)
+                speech = speakWord(text, 'en')
+                console.log speech
+                window.speechSynthesis.speak(speech)
                 return
             $scope.showPopup = (image) ->
                 console.log image
@@ -315,6 +335,16 @@ app.controller "BookCtrl", [
         return
     return
 ]
+
+speakWord = (word, lang) ->
+    speechLang = {"es": "es-mx", "zh": "zh-cn", "ar": "ar-eg", "pt": "pt-br", "fr": "fr-fr", "de" : "de-de", "en" : "en-us"}
+    utterance = new SpeechSynthesisUtterance()
+    utterance.text = word
+    utterance.lang = speechLang[lang]
+    utterance.rate = 0.1 # activeUser.speed
+    return utterance
+    # window.speechSynthesis.speak(utterance)
+
 
 app.controller "EditCtrl", [
   "$scope"
@@ -406,11 +436,23 @@ app.service "fileUpload", [
       return
 ]
 
-app.run ($ionicPlatform) ->
+
+app.run ($ionicPlatform, $rootScope, $location) ->
     $ionicPlatform.ready ->
         
         # Hide the accessory bar by default (remove this to show the accessory bar above the keyboard
         # for form inputs)
+
+        history = []
+        $rootScope.$on "$routeChangeSuccess", ->
+          history.push $location.$$path
+          return
+
+        $rootScope.back = ->
+          prevUrl = (if history.length > 1 then history.splice(-2)[0] else "/")
+          $location.path prevUrl
+          return
+
         cordova.plugins.Keyboard.hideKeyboardAccessoryBar true  if window.cordova and window.cordova.plugins.Keyboard
         StatusBar.styleDefault()  if window.StatusBar
         return

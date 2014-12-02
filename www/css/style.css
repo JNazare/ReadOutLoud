@@ -92,6 +92,10 @@ a.no_decoration{
   color: #4a87ee;
 }
 
+.spokenWord{
+	color: red;
+}
+
 .admin-link{
 	padding-left: 10px;
 }
