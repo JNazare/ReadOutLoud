@@ -4,3 +4,8 @@
 node_modules/
 platforms/
 plugins/
+scss/
+hooks/
+.DS_Store
+.bowerrc
+gulpfile.js
