@@ -57,8 +57,6 @@ app.config(($routeProvider, $locationProvider) ->
 
 app.controller("LoginCtrl", ($scope, $kinvey, $location) ->
     $scope.templates = [{ name: 'navbar.html', url: '_partials/navbar.html'}]
-    $scope.email=""
-    $scope.password=""
     $scope.submit = ->
         promise = $kinvey.User.login(
             username: $scope.email
@@ -76,9 +74,6 @@ app.controller("LoginCtrl", ($scope, $kinvey, $location) ->
 app.controller("LostLoginCtrl", ($scope, $kinvey, $location) ->
     $scope.templates = [{ name: 'navbar.html', url: '_partials/navbar.html'}]
     $scope.back_button = true
-    $scope.email=""
-    $scope.password=""
-    $scope.flash = ""
     $scope.submit = ->
         promise = $kinvey.User.resetPassword( $scope.email )
         promise.then () ->
@@ -90,9 +85,6 @@ app.controller("LostLoginCtrl", ($scope, $kinvey, $location) ->
 app.controller("SignupCtrl", ($scope, $kinvey, $location) ->
     $scope.templates = [{ name: 'navbar.html', url: '_partials/navbar.html'}]
     $scope.back_button = true
-    $scope.email=""
-    $scope.password=""
-    $scope.nativelang=""
     $scope.submit = ->
         promise = $kinvey.User.signup(
             username: $scope.email
@@ -111,25 +103,22 @@ app.controller("SignupCtrl", ($scope, $kinvey, $location) ->
 app.controller("SettingsCtrl", ($scope, $kinvey, $location, $rootScope) ->
     $scope.templates = [{ name: 'navbar.html', url: '_partials/navbar.html'}]
     $scope.back_button = true
-    $scope.flash = ""
-    $scope.nativelang=""
-    activeUser = $kinvey.getActiveUser()
-    $scope.activeuser = activeUser
-    languages = {"es": "Spanish", "zh": "Chinese", "ar": "Arabic", "pt": "Portuguese", "fr": "French", "de" : "German"}
-    $scope.currentLanguage = languages[activeUser.nativelang]
-    delete languages[activeUser.nativelang]
-    $scope.languages = languages
-    $scope.currentSpeed = activeUser.speed
+    $scope.activeuser = $kinvey.getActiveUser()
+    query = new $kinvey.Query()
+    promise = $kinvey.DataStore.find('languages', query)
+    promise.then (languages) ->
+        $scope.languages = languages
+        $scope.currentLanguage = $scope.languages[selectActiveLanguage(languages, $scope.activeuser.nativelang)]
     $scope.submit = ->
-        if($scope.nativelang)
-            activeUser.nativelang = $scope.nativelang
-            promise = $kinvey.User.update(activeUser)
+        if($scope.currentLanguage)
+            $scope.activeuser.nativelang = $scope.currentLanguage._id
+            promise = $kinvey.User.update($scope.activeuser)
             promise.then (activeUser) ->
                 $rootScope.back()
             return
         if($scope.activeuser.speed)
-            activeUser.speed = $scope.activeuser.speed
-            promise = $kinvey.User.update(activeUser)
+            $scope.activeuser.speed = $scope.activeuser.speed
+            promise = $kinvey.User.update($scope.activeuser)
             promise.then (activeUser) ->
                 $rootScope.back()
                 return
@@ -354,6 +343,14 @@ speakWord = (word, lang) ->
     return utterance
     # window.speechSynthesis.speak(utterance)
 
+
+selectActiveLanguage = (languages, nativelang) ->
+    i = 0
+    while (i < languages.length)
+        if languages[i]._id==nativelang
+            break
+        i++
+    return i
 
 app.controller "EditCtrl", [
   "$scope"
