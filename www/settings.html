@@ -1,36 +1,31 @@
-<ion-header-bar class="bar-positive">
-	<a ng-click='back()' class="no_decoration">
-        <button class="button button-clear icon ion-chevron-left"></button>
-    </a>
-    <h1 class="title"><a href="#/" class="no_decoration">Storyteller</a></h1>
-</ion-header-bar>
-<ion-content>
+<ion-header-bar class="navbar-color" ng-include="templates[0].url"></ion-header-bar>
+<ion-content class="has-header">
 	<form ng-submit="submit()" name="settingsForm" ng-controller="SettingsCtrl" class="settings-form">
 		<div class="list list-inset">
-	  	  <div class="item item-divider">
-		    Speed of Voice
-		  </div>
-	  	  <div class="item range range-positive">
-		    <i class="icon ion-arrow-down-a"></i>
-		    <input type="range" name="volume" ng-model="activeuser.speed" min="0" max="1" value="{{activeuser.speed}}" step="0.01" >
-		    <i class="icon ion-arrow-up-a"></i>
-		  </div>
-		  <div class="item item-divider">
-		    Native Language
-		  </div>
-		  <label class="item item-input item-select">
-		    <div class="input-label">
-		      {{currentLanguage}}
-		    </div>
-		    <select name="nativelang" ng-model="nativelang" required>
-		      <option ng-repeat="(val, name) in languages" value="{{val}}" selected>{{name}}</option>
-		    </select>
-		  </label>
-		  <button type="submit" class="button button-block button-stable">
-		    Save
-		  </button>
+				<div class="item item-divider">
+				Speed of Voice
+			</div>
+				<div class="item range range-positive">
+				<i class="icon ion-arrow-down-a"></i>
+				<input type="range" name="volume" ng-model="activeuser.speed" min="0" max="1" value="{{activeuser.speed}}" step="0.01" >
+				<i class="icon ion-arrow-up-a"></i>
+			</div>
+			<div class="item item-divider">
+				Native Language
+			</div>
+			<label class="item item-input item-select">
+				<div class="input-label">
+					{{currentLanguage}}
+				</div>
+				<select name="nativelang" ng-model="nativelang" required>
+					<option ng-repeat="(val, name) in languages" value="{{val}}" selected>{{name}}</option>
+				</select>
+			</label>
+			<button type="submit" class="button button-block button-stable">
+				Save
+			</button>
 		</div>
-		<a ngif="activeuser.username equals juliana@media.mit.edu" class="assertive admin-link" href="#/admin"> 
+		<a ngif="activeuser.username equals juliana@media.mit.edu" class="assertive admin-link" href="#/admin">
 			<strong>
 				Admin capabilities
 			</strong>

@@ -1,18 +1,13 @@
-<ion-header-bar class="bar-positive">
-    <h1 class="title"><a href="#/" class="no_decoration">Storyteller</a></h1>
-    <a href="#/settings">
-    	<button ng-if="activeuser" class="button button-clear icon ion-gear-a settings-button"></button>
-    </a>
-</ion-header-bar>
-<ion-content>
+<ion-header-bar class="navbar-color" ng-include="templates[0].url"></ion-header-bar>
+<ion-content class="has-header">
 	<form ng-submit="submit()" name="lostloginForm" ng-controller="LostLoginCtrl" class="login-form">
 		<div class="list list-inset">
-		  <label class="item item-input">
-		    <input name="email" ng-model="email" type="email" placeholder="Email" required>
-		  </label>
-		  <button type="submit" class="button button-block button-stable">
-		    Reset Password
-		  </button>
+			<label class="item item-input">
+				<input name="email" ng-model="email" type="email" placeholder="Email" required>
+			</label>
+			<button type="submit" class="button button-block button-stable">
+				Reset Password
+			</button>
 		</div>
 	</form>
 </ion-content>

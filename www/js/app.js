@@ -55,6 +55,12 @@
   });
 
   app.controller("LoginCtrl", function($scope, $kinvey, $location) {
+    $scope.templates = [
+      {
+        name: 'navbar.html',
+        url: '_partials/navbar.html'
+      }
+    ];
     $scope.email = "";
     $scope.password = "";
     $scope.submit = function() {
@@ -64,7 +70,6 @@
         password: $scope.password
       });
       return promise.then((function(activeUser) {
-        console.log('logging in');
         $scope.activeuser = activeUser;
         $location.path("/");
       }), function(error) {
@@ -74,6 +79,13 @@
   });
 
   app.controller("LostLoginCtrl", function($scope, $kinvey, $location) {
+    $scope.templates = [
+      {
+        name: 'navbar.html',
+        url: '_partials/navbar.html'
+      }
+    ];
+    $scope.back_button = true;
     $scope.email = "";
     $scope.password = "";
     $scope.flash = "";
@@ -87,6 +99,13 @@
   });
 
   app.controller("SignupCtrl", function($scope, $kinvey, $location) {
+    $scope.templates = [
+      {
+        name: 'navbar.html',
+        url: '_partials/navbar.html'
+      }
+    ];
+    $scope.back_button = true;
     $scope.email = "";
     $scope.password = "";
     $scope.nativelang = "";
@@ -108,6 +127,13 @@
 
   app.controller("SettingsCtrl", function($scope, $kinvey, $location, $rootScope) {
     var activeUser, languages;
+    $scope.templates = [
+      {
+        name: 'navbar.html',
+        url: '_partials/navbar.html'
+      }
+    ];
+    $scope.back_button = true;
     $scope.flash = "";
     $scope.nativelang = "";
     activeUser = $kinvey.getActiveUser();
@@ -148,6 +174,12 @@
 
   app.controller("HomeCtrl", function($scope, $kinvey, $location) {
     var promise;
+    $scope.templates = [
+      {
+        name: 'navbar.html',
+        url: '_partials/navbar.html'
+      }
+    ];
     promise = $kinvey.init({
       appKey: "kid_bJe2dFWlU",
       appSecret: "a22c88799ce248298aff031b96946969",
@@ -173,6 +205,13 @@
 
   app.controller("AdminCtrl", function($scope, $kinvey, $location, $route) {
     var promise;
+    $scope.templates = [
+      {
+        name: 'navbar.html',
+        url: '_partials/navbar.html'
+      }
+    ];
+    $scope.back_button = true;
     promise = $kinvey.init({
       appKey: "kid_bJe2dFWlU",
       appSecret: "a22c88799ce248298aff031b96946969",
@@ -213,6 +252,13 @@
   app.controller("NewBookCtrl", [
     "$scope", "$kinvey", "fileUpload", "$location", function($scope, $kinvey, $fileUpload, $location) {
       var promise;
+      $scope.templates = [
+        {
+          name: 'navbar.html',
+          url: '_partials/navbar.html'
+        }
+      ];
+      $scope.back_button = true;
       promise = $kinvey.init({
         appKey: "kid_bJe2dFWlU",
         appSecret: "a22c88799ce248298aff031b96946969",
@@ -256,6 +302,13 @@
   app.controller("NewPageCtrl", [
     "$scope", "$kinvey", "fileUpload", "$location", function($scope, $kinvey, $fileUpload, $location) {
       var promise;
+      $scope.templates = [
+        {
+          name: 'navbar.html',
+          url: '_partials/navbar.html'
+        }
+      ];
+      $scope.back_button = true;
       promise = $kinvey.init({
         appKey: "kid_bJe2dFWlU",
         appSecret: "a22c88799ce248298aff031b96946969",
@@ -268,14 +321,12 @@
           return $scope.uploadFile = function() {
             var cover_image, upload_promise;
             cover_image = $scope.myFile;
-            console.log(cover_image);
             upload_promise = $kinvey.File.upload(cover_image, {
               mimeType: "image/jpeg",
               size: cover_image.size
             });
             upload_promise.then(function(file) {
               var book_id, new_page, query;
-              console.log('uploaded file');
               new_page = {
                 text: $scope.text,
                 image: {
@@ -287,7 +338,6 @@
               query = $kinvey.DataStore.get("books", book_id);
               return query.then(function(book) {
                 var page_index, page_promise;
-                console.log('fetched book');
                 if ($scope.at_end) {
                   book.pages.push(new_page);
                   page_promise = $kinvey.DataStore.save("books", book);
@@ -315,6 +365,13 @@
   app.controller("BookCtrl", [
     "$scope", "$location", "$kinvey", "$ionicSlideBoxDelegate", "$sce", "$http", "$ionicPopup", function($scope, $location, $kinvey, $ionicSlideBoxDelegate, $sce, $http, $ionicPopup) {
       var getuser, word_count;
+      $scope.templates = [
+        {
+          name: 'navbar.html',
+          url: '_partials/navbar.html'
+        }
+      ];
+      $scope.back_button = true;
       $scope.selectedIndex = -1;
       $scope.count = 0;
       word_count = 0;
@@ -353,21 +410,17 @@
               speech2 = speakWord(data, activeUser.nativelang);
               window.speechSynthesis.speak(speech1);
               window.speechSynthesis.speak(speech2);
-            }).error(function(data, status, headers, config) {
-              console.log("error");
-            });
+            }).error(function(data, status, headers, config) {});
           };
           $scope.clickMe = function(clickEvent) {
             var ct, speech, text;
             ct = 0;
             text = $scope.pages[clickEvent].text;
             speech = speakWord(text, 'en');
-            console.log(speech);
             window.speechSynthesis.speak(speech);
           };
           $scope.showPopup = function(image) {
             var alertPopup, tempate_string;
-            console.log(image);
             tempate_string = '<img src="' + image + '" width="100%">';
             return alertPopup = $ionicPopup.alert({
               template: tempate_string
@@ -399,6 +452,13 @@
   app.controller("EditCtrl", [
     "$scope", "$location", "$kinvey", "$ionicSlideBoxDelegate", "$sce", "$http", "fileUpload", "$route", "$filter", function($scope, $location, $kinvey, $ionicSlideBoxDelegate, $sce, $http, $fileUpload, $route, $filter) {
       var getuser;
+      $scope.templates = [
+        {
+          name: 'navbar.html',
+          url: '_partials/navbar.html'
+        }
+      ];
+      $scope.back_button = true;
       getuser = $kinvey.User.me();
       getuser.then(function(activeUser) {
         var book_id, query;
@@ -414,7 +474,6 @@
             var delete_page_image_promise, page_image, updated_page_promise, upload_promise;
             page_image = $scope.myFile;
             if (page_image) {
-              console.log(book.pages[page_index].image._id);
               delete_page_image_promise = $kinvey.File.destroy(book.pages[page_index].image._id);
               upload_promise = $kinvey.File.upload(page_image, {
                 mimeType: "image/jpeg",
@@ -427,10 +486,8 @@
                   _type: "KinveyFile"
                 };
                 book.pages[page_index].text = $scope.text;
-                console.log(book.pages[page_index]);
                 updated_page_promise = $kinvey.DataStore.save('books', book);
                 return updated_page_promise.then(function(page) {
-                  console.log('done');
                   return $route.reload();
                 });
               });
@@ -438,7 +495,6 @@
               book.pages[page_index].text = $scope.text;
               updated_page_promise = $kinvey.DataStore.save('books', book);
               return updated_page_promise.then(function(page) {
-                console.log('done');
                 return $route.reload();
               });
             }
@@ -449,7 +505,6 @@
             book.pages.splice(page_index, 1);
             delete_page_promise = $kinvey.DataStore.save('books', book);
             return delete_page_promise.then(function(page) {
-              console.log('done');
               return $route.reload();
             });
           };

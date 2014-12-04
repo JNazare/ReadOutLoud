@@ -56,6 +56,7 @@ app.config(($routeProvider, $locationProvider) ->
 )
 
 app.controller("LoginCtrl", ($scope, $kinvey, $location) ->
+    $scope.templates = [{ name: 'navbar.html', url: '_partials/navbar.html'}]
     $scope.email=""
     $scope.password=""
     $scope.submit = ->
@@ -64,7 +65,6 @@ app.controller("LoginCtrl", ($scope, $kinvey, $location) ->
             password: $scope.password
         )
         promise.then ((activeUser) ->
-            console.log 'logging in'
             $scope.activeuser = activeUser
             $location.path("/")
             return),
@@ -74,6 +74,8 @@ app.controller("LoginCtrl", ($scope, $kinvey, $location) ->
     )
 
 app.controller("LostLoginCtrl", ($scope, $kinvey, $location) ->
+    $scope.templates = [{ name: 'navbar.html', url: '_partials/navbar.html'}]
+    $scope.back_button = true
     $scope.email=""
     $scope.password=""
     $scope.flash = ""
@@ -86,6 +88,8 @@ app.controller("LostLoginCtrl", ($scope, $kinvey, $location) ->
     )
 
 app.controller("SignupCtrl", ($scope, $kinvey, $location) ->
+    $scope.templates = [{ name: 'navbar.html', url: '_partials/navbar.html'}]
+    $scope.back_button = true
     $scope.email=""
     $scope.password=""
     $scope.nativelang=""
@@ -105,6 +109,8 @@ app.controller("SignupCtrl", ($scope, $kinvey, $location) ->
     )
 
 app.controller("SettingsCtrl", ($scope, $kinvey, $location, $rootScope) ->
+    $scope.templates = [{ name: 'navbar.html', url: '_partials/navbar.html'}]
+    $scope.back_button = true
     $scope.flash = ""
     $scope.nativelang=""
     activeUser = $kinvey.getActiveUser()
@@ -133,6 +139,7 @@ app.controller("SettingsCtrl", ($scope, $kinvey, $location, $rootScope) ->
     )
 
 app.controller("HomeCtrl", ($scope, $kinvey, $location) ->
+    $scope.templates = [{ name: 'navbar.html', url: '_partials/navbar.html'}]
     promise = $kinvey.init(
         appKey: "kid_bJe2dFWlU"
         appSecret: "a22c88799ce248298aff031b96946969"
@@ -155,6 +162,8 @@ app.controller("HomeCtrl", ($scope, $kinvey, $location) ->
 )
 
 app.controller("AdminCtrl", ($scope, $kinvey, $location, $route) ->
+    $scope.templates = [{ name: 'navbar.html', url: '_partials/navbar.html'}]
+    $scope.back_button = true
     promise = $kinvey.init(
         appKey: "kid_bJe2dFWlU"
         appSecret: "a22c88799ce248298aff031b96946969"
@@ -192,6 +201,8 @@ app.controller "NewBookCtrl", [
   "fileUpload"
   "$location"
   ($scope, $kinvey, $fileUpload, $location) ->
+    $scope.templates = [{ name: 'navbar.html', url: '_partials/navbar.html'}]
+    $scope.back_button = true
     promise = $kinvey.init(
         appKey: "kid_bJe2dFWlU"
         appSecret: "a22c88799ce248298aff031b96946969"
@@ -203,17 +214,17 @@ app.controller "NewBookCtrl", [
             $scope.uploadFile = ->
                 cover_image = $scope.myFile
                 upload_promise = $kinvey.File.upload(cover_image,
-                  mimeType: "image/jpeg"
-                  size: cover_image.size
+                    mimeType: "image/jpeg"
+                    size: cover_image.size
                 )
                 upload_promise.then (file) ->
                     page_promise = $kinvey.DataStore.save("books",
-                      title: $scope.title
-                      author: $scope.author
-                      cover_id: 
-                        _type: "KinveyFile"
-                        _id: file._id
-                      created_by: activeUser._id
+                        title: $scope.title
+                        author: $scope.author
+                        cover_id: 
+                            _type: "KinveyFile"
+                            _id: file._id
+                        created_by: activeUser._id
                     )
                     page_promise.then (book) ->
                         $scope.activeuser = activeUser
@@ -230,6 +241,8 @@ app.controller "NewPageCtrl", [
   "fileUpload"
   "$location"
   ($scope, $kinvey, $fileUpload, $location) ->
+    $scope.templates = [{ name: 'navbar.html', url: '_partials/navbar.html'}]
+    $scope.back_button = true
     promise = $kinvey.init(
         appKey: "kid_bJe2dFWlU"
         appSecret: "a22c88799ce248298aff031b96946969"
@@ -240,13 +253,11 @@ app.controller "NewPageCtrl", [
         if(activeUser)
             $scope.uploadFile = ->
                 cover_image = $scope.myFile
-                console.log cover_image
                 upload_promise = $kinvey.File.upload(cover_image,
-                  mimeType: "image/jpeg"
-                  size: cover_image.size
+                    mimeType: "image/jpeg"
+                    size: cover_image.size
                 )
                 upload_promise.then (file) ->
-                    console.log 'uploaded file'
                     new_page = 
                         text: $scope.text
                         image: 
@@ -255,7 +266,6 @@ app.controller "NewPageCtrl", [
                     book_id = $location.path().split("/")[2]
                     query = $kinvey.DataStore.get("books", book_id)
                     query.then (book) ->
-                        console.log 'fetched book'
                         if($scope.at_end)
                             book.pages.push(new_page)
                             page_promise = $kinvey.DataStore.save("books", book)
@@ -282,6 +292,8 @@ app.controller "BookCtrl", [
   "$http"
   "$ionicPopup"
   ($scope, $location, $kinvey, $ionicSlideBoxDelegate, $sce, $http, $ionicPopup) ->
+    $scope.templates = [{ name: 'navbar.html', url: '_partials/navbar.html'}]
+    $scope.back_button = true
     $scope.selectedIndex = -1;
     $scope.count = 0
     word_count = 0
@@ -297,9 +309,9 @@ app.controller "BookCtrl", [
             new_pages = []
             angular.forEach book.pages, (page) ->
                 new_pages.push
-                  image: page.image
-                  text: page.text
-                  listed_text: page.text.split(" ")
+                    image: page.image
+                    text: page.text
+                    listed_text: page.text.split(" ")
             $scope.pages = new_pages
             $ionicSlideBoxDelegate.update()
             $scope.translateWord = (txt, $index) ->
@@ -308,28 +320,25 @@ app.controller "BookCtrl", [
                 txt = txt.replace(/["\.,-\/#!$%\^&\*;:{}=\-_`~()]/g,"")
                 link = "https://translation-app.herokuapp.com/api/en/"+activeUser.nativelang+"/"+txt
                 $http.get(link).success((data, status, headers, config) ->
-                  $scope.translated_word = data
-                  $scope.selected_word = txt
-                  speech1 = speakWord(txt, 'en')
-                  speech2 = speakWord(data, activeUser.nativelang)
-                  window.speechSynthesis.speak(speech1)
-                  window.speechSynthesis.speak(speech2)
-                  return
+                    $scope.translated_word = data
+                    $scope.selected_word = txt
+                    speech1 = speakWord(txt, 'en')
+                    speech2 = speakWord(data, activeUser.nativelang)
+                    window.speechSynthesis.speak(speech1)
+                    window.speechSynthesis.speak(speech2)
+                    return
                 ).error (data, status, headers, config) ->
-                  console.log "error"
-                  return
+                    return
             $scope.clickMe = (clickEvent) ->
                 ct = 0
                 text = $scope.pages[clickEvent].text
                 speech = speakWord(text, 'en')
-                console.log speech
                 window.speechSynthesis.speak(speech)
                 return
             $scope.showPopup = (image) ->
-                console.log image
                 tempate_string = '<img src="' + image + '" width="100%">'
                 alertPopup = $ionicPopup.alert(
-                  template: tempate_string
+                    template: tempate_string
                 )
             return
         return
@@ -357,6 +366,8 @@ app.controller "EditCtrl", [
   "$route"
   "$filter"
   ($scope, $location, $kinvey, $ionicSlideBoxDelegate, $sce, $http, $fileUpload, $route, $filter) ->
+    $scope.templates = [{ name: 'navbar.html', url: '_partials/navbar.html'}]
+    $scope.back_button = true
     getuser = $kinvey.User.me()
     getuser.then (activeUser) ->
         $scope.activeuser = activeUser
@@ -370,34 +381,29 @@ app.controller "EditCtrl", [
             $scope.uploadFile = (page_index) ->
                 page_image = $scope.myFile
                 if page_image
-                    console.log book.pages[page_index].image._id
                     delete_page_image_promise = $kinvey.File.destroy(book.pages[page_index].image._id)
                     upload_promise = $kinvey.File.upload(page_image,
-                      mimeType: "image/jpeg"
-                      size: page_image.size
+                        mimeType: "image/jpeg"
+                        size: page_image.size
                     )
                     upload_promise.then (file) ->
                         book.pages[page_index].image = 
                             _id: file._id
                             _type: "KinveyFile"
                         book.pages[page_index].text = $scope.text
-                        console.log book.pages[page_index]
                         updated_page_promise = $kinvey.DataStore.save('books', book)
                         updated_page_promise.then (page) ->
-                            console.log 'done'
                             $route.reload()
                 else
                     book.pages[page_index].text = $scope.text
                     updated_page_promise = $kinvey.DataStore.save('books', book)
                     updated_page_promise.then (page) ->
-                        console.log 'done'
                         $route.reload()
             $scope.deletePage = (page_index) ->
                 delete_page_image_promise = $kinvey.File.destroy(book.pages[page_index].image._id)
                 book.pages.splice(page_index, 1)
                 delete_page_promise = $kinvey.DataStore.save('books', book)
                 delete_page_promise.then (page) ->
-                    console.log 'done'
                     $route.reload()
             return
         return
@@ -408,32 +414,32 @@ app.directive "fileModel", [
   "$parse"
   ($parse) ->
     return (
-      restrict: "A"
-      link: (scope, element, attrs) ->
-        model = $parse(attrs.fileModel)
-        modelSetter = model.assign
-        element.bind "change", ->
-          scope.$apply ->
-            modelSetter scope, element[0].files[0]
+        restrict: "A"
+        link: (scope, element, attrs) ->
+            model = $parse(attrs.fileModel)
+            modelSetter = model.assign
+            element.bind "change", ->
+                scope.$apply ->
+                    modelSetter scope, element[0].files[0]
+                    return
+                return
             return
-          return
-        return
-    )
+        )
 ]
 
 app.service "fileUpload", [
   "$http"
   ($http) ->
     @uploadFileToUrl = (file, uploadUrl) ->
-      fd = new FormData()
-      fd.append "file", file
-      $http.post(uploadUrl, fd,
-        transformRequest: angular.identity
-        headers:
-          "Content-Type": `undefined`
-      ).success(->
-      ).error ->
-      return
+        fd = new FormData()
+        fd.append "file", file
+        $http.post(uploadUrl, fd,
+            transformRequest: angular.identity
+            headers:
+                "Content-Type": `undefined`
+        ).success(->
+        ).error ->
+        return
 ]
 
 
@@ -445,13 +451,13 @@ app.run ($ionicPlatform, $rootScope, $location) ->
 
         history = []
         $rootScope.$on "$routeChangeSuccess", ->
-          history.push $location.$$path
-          return
+            history.push $location.$$path
+            return
 
         $rootScope.back = ->
-          prevUrl = (if history.length > 1 then history.splice(-2)[0] else "/")
-          $location.path prevUrl
-          return
+            prevUrl = (if history.length > 1 then history.splice(-2)[0] else "/")
+            $location.path prevUrl
+            return
 
         cordova.plugins.Keyboard.hideKeyboardAccessoryBar true  if window.cordova and window.cordova.plugins.Keyboard
         StatusBar.styleDefault()  if window.StatusBar

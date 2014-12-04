@@ -1,36 +1,27 @@
-<ion-header-bar class="bar-positive">
-	<a ng-click='back()' class="no_decoration">
-        <button class="button button-clear icon ion-chevron-left"></button>
-    </a>
-    <h1 class="title"><a href="#/" class="no_decoration">Storyteller</a></h1>
-    <a href="#/settings">
-    	<button ng-if="activeuser" class="button button-clear icon ion-gear-a settings-button"></button>
-    </a>
-</ion-header-bar>
-<ion-content>
+<ion-header-bar class="navbar-color" ng-include="templates[0].url"></ion-header-bar>
+<ion-content class="has-header">
 	<form name="newPageForm" ng-controller="NewPageCtrl" class="new-page-form">
 		<div class="list list-inset">
-		  <div class="list">
-			  <label class="item item-input">
-			    <input name="text" ng-model="text" type="text" placeholder="Insert text..." required>
-			  </label>
-			  <label class="item item-input">
-			  	<!-- <input type="file" file-model="myFile" required> -->
-			  	<input type="file" file-model="myFile"  accept="image/*" resize-max-height="300" resize-max-width="250" resize-quality="0.5" />
-			  </label>
-			  <label class="item item-toggle">
-			  Insert at End
-			  <label class="toggle">
-				   <input type="checkbox" ng-model="at_end">
-				   <div class="track">
-				     <div class="handle"></div>
-				   </div>
-			  </label>
-			  </label>
-		  </div>
-		  <button ng-click="uploadFile()" class="button button-block button-stable">
-		    Add Page
-		  </button>
+			<div class="list">
+				<label class="item item-input">
+					<input name="text" ng-model="text" type="text" placeholder="Insert text..." required>
+				</label>
+				<label class="item item-input">
+					<input type="file" file-model="myFile"  accept="image/*" resize-max-height="300" resize-max-width="250" resize-quality="0.5" />
+				</label>
+				<label class="item item-toggle">
+				Insert at End
+				<label class="toggle">
+					 <input type="checkbox" ng-model="at_end">
+					 <div class="track">
+						 <div class="handle"></div>
+					 </div>
+				</label>
+				</label>
+			</div>
+			<button ng-click="uploadFile()" class="button button-block button-stable">
+				Add Page
+			</button>
 		</div>
 	</form>
 </ion-content>

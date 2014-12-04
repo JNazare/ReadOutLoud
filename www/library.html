@@ -1,15 +1,10 @@
-<ion-header-bar class="bar-positive">
-    <h1 class="title"><a href="#/" class="no_decoration">Storyteller</a></h1>
-    <a href="#/settings">
-    	<button ng-if="activeuser" class="button button-clear icon ion-gear-a settings-button"></button>
-    </a>
-</ion-header-bar>
-<ion-content>
-  <div class="list">
-    <ion-item class="item-avatar-right library-list" ng-repeat="book in books" href="#/book/{{book._id}}" ng-if="book.pages">
-        <img class="book-avatar" src="{{book.cover_id._downloadURL}}">
-        <h3>{{book.title}}</h3>
-        <p>by {{book.author}}</p>
-    </ion-item>
-  </div>
+<ion-header-bar class="navbar-color" ng-include="templates[0].url"></ion-header-bar>
+<ion-content class="has-header">
+	<div class="list">
+		<ion-item class="item-avatar-right library-list" ng-repeat="book in books" href="#/book/{{book._id}}" ng-if="book.pages">
+			<img class="book-avatar" src="{{book.cover_id._downloadURL}}">
+			<h3>{{book.title}}</h3>
+			<p>by {{book.author}}</p>
+		</ion-item>
+	</div>
 </ion-content>
