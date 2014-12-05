@@ -143,8 +143,14 @@
     };
   });
 
-  app.controller("HomeCtrl", function($scope, $kinvey, $location) {
+  app.controller("HomeCtrl", function($scope, $kinvey, $location, $ionicLoading) {
     var promise;
+    $ionicLoading.show({
+      content: "Loading",
+      animation: "fade-in",
+      showBackdrop: true,
+      showDelay: 0
+    });
     $scope.templates = [
       {
         name: 'navbar.html',
@@ -165,6 +171,7 @@
         query = $kinvey.DataStore.find("books");
         query.then(function(books) {
           $scope.books = books;
+          $ionicLoading.hide();
         });
         return;
       } else {
@@ -305,8 +312,14 @@
   ]);
 
   app.controller("BookCtrl", [
-    "$scope", "$location", "$kinvey", "$ionicSlideBoxDelegate", "$sce", "$http", "$ionicPopup", "$ionicPopover", function($scope, $location, $kinvey, $ionicSlideBoxDelegate, $sce, $http, $ionicPopup, $ionicPopover) {
+    "$scope", "$location", "$kinvey", "$ionicSlideBoxDelegate", "$sce", "$http", "$ionicPopup", "$ionicPopover", "$ionicLoading", function($scope, $location, $kinvey, $ionicSlideBoxDelegate, $sce, $http, $ionicPopup, $ionicPopover, $ionicLoading) {
       var book_id, query;
+      $ionicLoading.show({
+        content: "Loading",
+        animation: "fade-in",
+        showBackdrop: true,
+        showDelay: 0
+      });
       $scope.templates = [
         {
           name: 'navbar.html',
@@ -332,7 +345,8 @@
         $scope.pages = new_pages;
         promise = $kinvey.DataStore.find('languages');
         promise.then(function(languages) {
-          return $scope.voice_code = languages[selectActiveLanguage(languages, $scope.activeuser.nativelang)].voice;
+          $scope.voice_code = languages[selectActiveLanguage(languages, $scope.activeuser.nativelang)].voice;
+          return $ionicLoading.hide();
         });
         $scope.translateWord = function($event, txt, $index) {
           var link;

@@ -37,6 +37,10 @@ button.button-balanced{
 	background-color: rgb(73, 143, 36) !important;
 }
 
+button.button-balanced:active{
+	background-color: rgb(46, 89, 23) !important;
+}
+
 .page_number{
 	color: #FFFFFF !important;
 	overflow: visible !important;

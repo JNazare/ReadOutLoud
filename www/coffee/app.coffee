@@ -118,7 +118,12 @@ app.controller("SettingsCtrl", ($scope, $kinvey, $location, $rootScope) ->
     return
     )
 
-app.controller("HomeCtrl", ($scope, $kinvey, $location) ->
+app.controller("HomeCtrl", ($scope, $kinvey, $location, $ionicLoading) ->
+    $ionicLoading.show
+        content: "Loading"
+        animation: "fade-in"
+        showBackdrop: true
+        showDelay: 0
     $scope.templates = [{ name: 'navbar.html', url: '_partials/navbar.html'}]
     promise = $kinvey.init(
         appKey: "kid_bJe2dFWlU"
@@ -132,6 +137,7 @@ app.controller("HomeCtrl", ($scope, $kinvey, $location) ->
             query = $kinvey.DataStore.find("books")
             query.then (books) ->
                 $scope.books = books
+                $ionicLoading.hide()
                 return
             return
         else
@@ -254,7 +260,14 @@ app.controller "BookCtrl", [
   "$http"
   "$ionicPopup"
   "$ionicPopover"
-  ($scope, $location, $kinvey, $ionicSlideBoxDelegate, $sce, $http, $ionicPopup, $ionicPopover) ->
+  "$ionicLoading"
+  ($scope, $location, $kinvey, $ionicSlideBoxDelegate, $sce, $http, $ionicPopup, $ionicPopover, $ionicLoading) ->
+    # Setup the loader
+    $ionicLoading.show
+        content: "Loading"
+        animation: "fade-in"
+        showBackdrop: true
+        showDelay: 0
     $scope.templates = [{ name: 'navbar.html', url: '_partials/navbar.html'}]
     $scope.back_button = true
     $ionicSlideBoxDelegate.update()
@@ -275,6 +288,7 @@ app.controller "BookCtrl", [
         promise = $kinvey.DataStore.find('languages')
         promise.then (languages) ->
             $scope.voice_code = languages[selectActiveLanguage(languages, $scope.activeuser.nativelang)].voice
+            $ionicLoading.hide()
         $scope.translateWord = ($event, txt, $index) ->
             $scope.selectedIndex = $index
             txt = txt.trim().replace(/["\.,-\/#!$%\^&\*;:{}=\-_`~()]/g,"")
