@@ -1,3 +1,75 @@
+h3{
+	font-size: 20px !important;
+}
+
+p{
+	font-size: 16px !important;
+}
+
+.title{
+	font-size: 20px !important;
+}
+
+.cover-image{
+	padding: 40px !important;
+}
+
+.start-reading{
+	text-align: center !important;
+	font-size: 20px !important;
+	margin: 0px !important;
+}
+
+.item.item-image{
+	border-color: rgb(73, 143, 36);
+}
+
+.book-card{
+	border: 1px solid rgb(73, 143, 36);
+	min-height: 100%;
+}
+
+a.no_decoration{
+	text-decoration: none;
+}
+
+button.button-balanced{
+	background-color: rgb(73, 143, 36) !important;
+}
+
+button.button-balanced:active{
+	background-color: rgb(46, 89, 23) !important;
+}
+
+.page_number{
+	color: #FFFFFF !important;
+	overflow: visible !important;
+	padding: 15px;
+	padding-left: 18px;
+	font-size: 20px !important;
+}
+
+.popover{
+	height: 100px !important;
+	text-align: center;
+}
+
+.directions{
+	color: #000000;
+	font-size: 12px;
+	/*text-align: left;*/
+}
+
+.logout-button{
+	float: right;
+}
+
+.icon.listen-icon:before {
+  font-size: 18px !important;
+}
+
+/*Old CSS*/
+
 .library-list:first-child{
 	border-top: none;
 }
@@ -7,28 +79,26 @@
 }
 
 .reading-text{
-	font-size: 16px !important;
+	font-size: 20px !important;
 	line-height: 150%;
-	padding-left: 10px;
-	padding-right: 10px; 
-}
-
-a.no_decoration{
-	text-decoration: none;
+	padding: 20px;
 }
 
 .page-card{
 	min-height: 60vh;
 	border-radius: 0px !important;
-	padding: 0px;
+	border: 0px !important;
+	padding: 0px !important;
 	background-color: #f5f5f5;
 	padding-top: 15px;
+
 }
 
 .page-thumbnail-holder{
-	background-color: #ffffff;
+	/*background-color: #ffffff;*/
 	border-bottom: 0px !important;
 	border-radius: 0px !important;
+	border: 0px !important;
 	padding-bottom: 0px;
 	padding-top: 0px;
 	padding-right: 7px;
@@ -39,30 +109,48 @@ a.no_decoration{
 	margin-top: -7px !important;
 	padding-bottom: 0px !important;
 	float: right;
+	max-width: 60px !important;
 }
 
 .page-thumbnail-image{
 	/*border-bottom: 1px solid #ddd;*/
 	/*border-left: 1px solid #ddd;*/
-	width: 20vw;
+	width: 50px;
+	height: 50px;
+	border-radius: 25px;
 	float: right;
+}
+
+.overlay {
+  width: 50px;
+  height: 50px;
+  background-color:#3f3f3f;
+  border-radius: 25px;
+  opacity:0.6;
 }
 
 .audio-button{
 	position:absolute;
-	bottom: 0px;
-	margin-bottom: 0px !important;
-	color: #66cc33 !important;
+	bottom: -10px;
+	margin: 0px !important;
+	font-size: 20px !important;
+	border: 0px !important;
+	border-top: 1px solid rgb(73, 143, 36);
+	border-radius: 0px !important;
+	/*color: #66cc33 !important;*/
 }
 
 .settings-button{
 	position:absolute;
 	right: 0px;
+	padding-right: 15px !important;
 }
 
 .word{
-	font-weight: normal;
-	font-size: 14px;
+	font-weight: bold;
+	font-size: 18px;
+	color: #4a87ee;
+	padding: 10px;
 }
 
 /*span.activated{

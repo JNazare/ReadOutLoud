@@ -54,13 +54,20 @@
     });
   });
 
-  app.controller("LoginCtrl", function($scope, $kinvey, $location) {
+  app.controller("LoginCtrl", function($scope, $kinvey, $location, $ionicLoading) {
+    $ionicLoading.show({
+      content: "Loading",
+      animation: "fade-in",
+      showBackdrop: true,
+      showDelay: 0
+    });
     $scope.templates = [
       {
         name: 'navbar.html',
         url: '_partials/navbar.html'
       }
     ];
+    $ionicLoading.hide();
     $scope.submit = function() {
       var promise;
       promise = $kinvey.User.login({
@@ -108,7 +115,8 @@
         password: $scope.password,
         nativelang: $scope.nativelang,
         email: $scope.email,
-        speed: 0.1
+        speed: 0.1,
+        role: "user"
       });
       return promise.then(function(activeUser) {
         $scope.activeuser = activeUser;
@@ -117,8 +125,14 @@
     };
   });
 
-  app.controller("SettingsCtrl", function($scope, $kinvey, $location, $rootScope) {
+  app.controller("SettingsCtrl", function($scope, $kinvey, $location, $rootScope, $ionicLoading) {
     var promise;
+    $ionicLoading.show({
+      content: "Loading",
+      animation: "fade-in",
+      showBackdrop: true,
+      showDelay: 0
+    });
     $scope.templates = [
       {
         name: 'navbar.html',
@@ -130,31 +144,31 @@
     promise = $kinvey.DataStore.find('languages');
     promise.then(function(languages) {
       $scope.languages = languages;
-      return $scope.currentLanguage = $scope.languages[selectActiveLanguage(languages, $scope.activeuser.nativelang)];
+      $scope.currentLanguage = $scope.languages[selectActiveLanguage(languages, $scope.activeuser.nativelang)];
+      return $ionicLoading.hide();
     });
     $scope.submit = function() {
-      if ($scope.currentLanguage) {
-        $scope.activeuser.nativelang = $scope.currentLanguage._id;
-        promise = $kinvey.User.update($scope.activeuser);
-        promise.then(function(activeUser) {
-          return $rootScope.back();
-        });
-        return;
-      }
-      if ($scope.activeuser.speed) {
-        $scope.activeuser.speed = $scope.activeuser.speed;
-        promise = $kinvey.User.update($scope.activeuser);
-        promise.then(function(activeUser) {
-          $rootScope.back();
-        });
-        return;
-      }
-      return $rootScope.back();
+      $scope.activeuser.nativelang = $scope.currentLanguage._id;
+      $scope.activeuser.speed = Number($scope.activeuser.speed);
+      promise = $kinvey.User.update($scope.activeuser);
+      return promise.then(function(activeUser) {
+        return $rootScope.back();
+      });
+    };
+    $scope.logout = function() {
+      promise = $kinvey.User.logout();
+      return $location.path("/login");
     };
   });
 
-  app.controller("HomeCtrl", function($scope, $kinvey, $location) {
+  app.controller("HomeCtrl", function($scope, $kinvey, $location, $ionicLoading) {
     var promise;
+    $ionicLoading.show({
+      content: "Loading",
+      animation: "fade-in",
+      showBackdrop: true,
+      showDelay: 0
+    });
     $scope.templates = [
       {
         name: 'navbar.html',
@@ -175,6 +189,7 @@
         query = $kinvey.DataStore.find("books");
         query.then(function(books) {
           $scope.books = books;
+          $ionicLoading.hide();
         });
         return;
       } else {
@@ -315,8 +330,14 @@
   ]);
 
   app.controller("BookCtrl", [
-    "$scope", "$location", "$kinvey", "$ionicSlideBoxDelegate", "$sce", "$http", "$ionicPopup", function($scope, $location, $kinvey, $ionicSlideBoxDelegate, $sce, $http, $ionicPopup) {
+    "$scope", "$location", "$kinvey", "$ionicSlideBoxDelegate", "$sce", "$http", "$ionicPopup", "$ionicPopover", "$ionicLoading", function($scope, $location, $kinvey, $ionicSlideBoxDelegate, $sce, $http, $ionicPopup, $ionicPopover, $ionicLoading) {
       var book_id, query;
+      $ionicLoading.show({
+        content: "Loading",
+        animation: "fade-in",
+        showBackdrop: true,
+        showDelay: 0
+      });
       $scope.templates = [
         {
           name: 'navbar.html',
@@ -342,9 +363,10 @@
         $scope.pages = new_pages;
         promise = $kinvey.DataStore.find('languages');
         promise.then(function(languages) {
-          return $scope.voice_code = languages[selectActiveLanguage(languages, $scope.activeuser.nativelang)].voice;
+          $scope.voice_code = languages[selectActiveLanguage(languages, $scope.activeuser.nativelang)].voice;
+          return $ionicLoading.hide();
         });
-        $scope.translateWord = function(txt, $index) {
+        $scope.translateWord = function($event, txt, $index) {
           var link;
           $scope.selectedIndex = $index;
           txt = txt.trim().replace(/["\.,-\/#!$%\^&\*;:{}=\-_`~()]/g, "");
@@ -353,6 +375,7 @@
             var speech_english, speech_native;
             $scope.translated_word = data;
             $scope.selected_word = txt;
+            $scope.popover.show($event);
             speech_english = speakText(txt, 'en-us', $scope.activeuser.speed);
             speech_native = speakText(data, $scope.voice_code, $scope.activeuser.speed);
             window.speechSynthesis.speak(speech_english);
@@ -361,18 +384,46 @@
         };
         $scope.clickMe = function(clickEvent) {
           var speech, text;
+          console.log('here');
           text = $scope.pages[clickEvent].text;
           speech = speakText(text, 'en-us', $scope.activeuser.speed);
-          window.speechSynthesis.speak(speech);
+          return window.speechSynthesis.speak(speech);
         };
-        $scope.showPopup = function(image) {
+        return $scope.showPopup = function(image) {
           var alertPopup, tempate_string;
           tempate_string = '<img src="' + image + '" width="100%">';
           return alertPopup = $ionicPopup.alert({
-            template: tempate_string
+            template: tempate_string,
+            buttons: [
+              {
+                text: "<strong>OK</strong>",
+                type: "button-balanced"
+              }
+            ]
           });
         };
-        return;
+      });
+      $ionicPopover.fromTemplateUrl("_partials/translation.html", {
+        scope: $scope
+      }).then(function(popover) {
+        $scope.popover = popover;
+      });
+      $scope.openPopover = function($event) {
+        $scope.popover.show($event);
+      };
+      $scope.closePopover = function() {
+        $scope.selectedIndex = -1;
+        $scope.popover.hide();
+      };
+      $scope.$on("$destroy", function() {
+        $scope.selectedIndex = -1;
+        $scope.popover.remove();
+      });
+      $scope.$on("popover.hidden", function() {
+        $scope.selectedIndex = -1;
+      });
+      $scope.$on("popover.removed", function() {
+        $scope.selectedIndex = -1;
       });
     }
   ]);

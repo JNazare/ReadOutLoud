@@ -1,30 +1,31 @@
-<ion-header-bar class="navbar-color" ng-include="templates[0].url"></ion-header-bar>
+<ion-header-bar class="bar-dark navbar-color" ng-include="templates[0].url"></ion-header-bar>
 <ion-content class="has-header">
 	<ion-slide-box on-slide-changed="slideHasChanged($index)" show-pager="false">
 		<ion-slide ng-repeat="page in pages">
-			<div ng-controller="BookCtrl" class="list card">
+			<div ng-controller="BookCtrl" class="list card book-card">
 				<div class="item item-divider page-thumbnail-holder">
 					<div class="row">
 						<div class="col col-center word">
-							{{selected_word}}
-							<i ng-if="selected_word" class="icon ion-arrow-swap"></i>
-							{{translated_word}}
 						</div>
 						<div class="col thumbnail-div">
-							<img class="page-thumbnail-image" ng-src="{{page.image._downloadURL}}" ng-click="showPopup(page.image._downloadURL)">
+							<img class="page-thumbnail-image" ng-src="{{page.image._downloadURL}}">
+							<div class="overlay" ng-click="showPopup(page.image._downloadURL)">
+								<p class="page_number">{{$index+1}}</p>
+							</div>
 						</div>
 					</div>
 				</div>
 				<div class="item item-text-wrap page-card">
 					<p id="text_js" class="reading-text">
-						<span ng-repeat="word in page.listed_text track by $index" ng-click="translateWord(word, $index)" ng-class="{ 'selected-class-name': $index == selectedIndex}">
+						<span ng-repeat="word in page.listed_text track by $index" ng-click="translateWord($event, word, $index)" ng-class="{ 'selected-class-name': $index == selectedIndex}">
 							{{word}}
 						</span>
 					</p>
-					<button id="audio_js" class="button button-full button-light item-icon-left audio-button" ng-click="clickMe($index)">
-						<i class="icon ion-volume-medium"></i>
-						Start listening
+					<button id="audio_js" class="button button-block button-balanced audio-button" ng-click="clickMe($index)">
+						<i class="icon listen-icon ion-play"></i>
+						<strong> &nbsp;&nbsp;PLAY </strong>
 					</button>
+
 				</div>
 			</div>
 		</ion-slide>

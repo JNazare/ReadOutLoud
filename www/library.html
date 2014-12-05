@@ -1,10 +1,15 @@
-<ion-header-bar class="navbar-color" ng-include="templates[0].url"></ion-header-bar>
+<ion-header-bar class="bar-dark navbar-color" ng-include="templates[0].url"></ion-header-bar>
 <ion-content class="has-header">
-	<div class="list">
-		<ion-item class="item-avatar-right library-list" ng-repeat="book in books" href="#/book/{{book._id}}" ng-if="book.pages">
-			<img class="book-avatar" ng-src="{{book.cover_id._downloadURL}}">
-			<h3>{{book.title}}</h3>
-			<p>by {{book.author}}</p>
-		</ion-item>
+	<div class="list card" ng-repeat="book in books" ng-if="book.pages">
+		<div class="item item-image">
+			<a href="#/book/{{book._id}}">
+				<img class="cover-image" ng-src="{{book.cover_id._downloadURL}}">
+			</a>
+		</div>
+		<a class="no_decoration" href="#/book/{{book._id}}">
+			<button class="button button-block button-balanced start-reading">
+				<strong> Start Reading </strong>
+			</button>
+		</a>
 	</div>
 </ion-content>

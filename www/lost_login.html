@@ -1,12 +1,12 @@
-<ion-header-bar class="navbar-color" ng-include="templates[0].url"></ion-header-bar>
+<ion-header-bar class="bar-dark navbar-color" ng-include="templates[0].url"></ion-header-bar>
 <ion-content class="has-header">
 	<form ng-submit="submit()" name="lostloginForm" ng-controller="LostLoginCtrl" class="login-form">
 		<div class="list list-inset">
 			<label class="item item-input">
 				<input name="email" ng-model="email" type="email" placeholder="Email" required>
 			</label>
-			<button type="submit" class="button button-block button-stable">
-				Reset Password
+			<button type="submit" class="button button-block button-balanced">
+				<strong> Reset Password </strong>
 			</button>
 		</div>
 	</form>

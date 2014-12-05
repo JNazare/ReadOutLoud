@@ -1,4 +1,4 @@
-<ion-header-bar class="navbar-color" ng-include="templates[0].url"></ion-header-bar>
+<ion-header-bar class="bar-dark navbar-color" ng-include="templates[0].url"></ion-header-bar>
 <ion-content class="has-header">
 	<form ng-submit="submit()" name="loginForm" ng-controller="LoginCtrl" class="login-form">
 		<div class="list list-inset">
@@ -11,8 +11,8 @@
 			<label class="item item-input">
 				<input name="password" ng-model="password" type="password" placeholder="Password" required>
 			</label>
-			<button type="submit" class="button button-block button-stable">
-				Login
+			<button type="submit" class="button button-block button-balanced">
+				<strong> Login </strong>
 			</button>
 			<a href="#/signup" class="button button-clear button-balanced">
 			<strong> New? Sign up here. </strong>

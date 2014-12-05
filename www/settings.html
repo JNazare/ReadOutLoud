@@ -1,11 +1,11 @@
-<ion-header-bar class="navbar-color" ng-include="templates[0].url"></ion-header-bar>
+<ion-header-bar class="bar-dark navbar-color" ng-include="templates[0].url"></ion-header-bar>
 <ion-content class="has-header">
 	<form ng-submit="submit()" name="settingsForm" ng-controller="SettingsCtrl" class="settings-form">
 		<div class="list list-inset">
 			<div class="item item-divider">
 				Speed of Voice
 			</div>
-				<div class="item range range-positive">
+				<div class="item range range-dark">
 				<i class="icon ion-arrow-down-a"></i>
 				<input type="range" name="volume" ng-model="activeuser.speed" min="0.1" max="1" value="{{activeuser.speed}}" step="0.1" >
 				<i class="icon ion-arrow-up-a"></i>
@@ -15,18 +15,21 @@
 			</div>
 			<label class="item item-input item-select">
 			    <div class="input-label">
-			      Native Language
+			      Select One
 			    </div>
 			   <select 
 					ng-model="currentLanguage" 
 					ng-options="l.name for l in languages track by l._id">
 				</select>
 		  	</label>
-			<button type="submit" class="button button-block button-stable">
-				Save
+			<button type="submit" class="button button-block button-balanced">
+				<strong> Save </strong>
+			</button>
+			<button ng-click="logout()" class="button button-clear button-dark logout-button">
+				Logout
 			</button>
 		</div>
-		<a ngif="activeuser.username equals juliana@media.mit.edu" class="assertive admin-link" href="#/admin">
+		<a ng-if="activeuser.role=='admin'" class="assertive admin-link" href="#/admin">
 			<strong>
 				Admin capabilities
 			</strong>
