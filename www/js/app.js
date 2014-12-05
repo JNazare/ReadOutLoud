@@ -54,13 +54,20 @@
     });
   });
 
-  app.controller("LoginCtrl", function($scope, $kinvey, $location) {
+  app.controller("LoginCtrl", function($scope, $kinvey, $location, $ionicLoading) {
+    $ionicLoading.show({
+      content: "Loading",
+      animation: "fade-in",
+      showBackdrop: true,
+      showDelay: 0
+    });
     $scope.templates = [
       {
         name: 'navbar.html',
         url: '_partials/navbar.html'
       }
     ];
+    $ionicLoading.hide();
     $scope.submit = function() {
       var promise;
       promise = $kinvey.User.login({
@@ -118,8 +125,14 @@
     };
   });
 
-  app.controller("SettingsCtrl", function($scope, $kinvey, $location, $rootScope) {
+  app.controller("SettingsCtrl", function($scope, $kinvey, $location, $rootScope, $ionicLoading) {
     var promise;
+    $ionicLoading.show({
+      content: "Loading",
+      animation: "fade-in",
+      showBackdrop: true,
+      showDelay: 0
+    });
     $scope.templates = [
       {
         name: 'navbar.html',
@@ -131,7 +144,8 @@
     promise = $kinvey.DataStore.find('languages');
     promise.then(function(languages) {
       $scope.languages = languages;
-      return $scope.currentLanguage = $scope.languages[selectActiveLanguage(languages, $scope.activeuser.nativelang)];
+      $scope.currentLanguage = $scope.languages[selectActiveLanguage(languages, $scope.activeuser.nativelang)];
+      return $ionicLoading.hide();
     });
     $scope.submit = function() {
       $scope.activeuser.nativelang = $scope.currentLanguage._id;
@@ -140,6 +154,10 @@
       return promise.then(function(activeUser) {
         return $rootScope.back();
       });
+    };
+    $scope.logout = function() {
+      promise = $kinvey.User.logout();
+      return $location.path("/login");
     };
   });
 

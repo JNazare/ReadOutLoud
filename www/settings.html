@@ -25,6 +25,9 @@
 			<button type="submit" class="button button-block button-balanced">
 				<strong> Save </strong>
 			</button>
+			<button ng-click="logout()" class="button button-clear button-dark logout-button">
+				Logout
+			</button>
 		</div>
 		<a ng-if="activeuser.role=='admin'" class="assertive admin-link" href="#/admin">
 			<strong>

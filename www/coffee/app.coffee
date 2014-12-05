@@ -55,8 +55,14 @@ app.config(($routeProvider, $locationProvider) ->
     return
 )
 
-app.controller("LoginCtrl", ($scope, $kinvey, $location) ->
+app.controller("LoginCtrl", ($scope, $kinvey, $location, $ionicLoading) ->
+    $ionicLoading.show
+        content: "Loading"
+        animation: "fade-in"
+        showBackdrop: true
+        showDelay: 0
     $scope.templates = [{ name: 'navbar.html', url: '_partials/navbar.html'}]
+    $ionicLoading.hide()
     $scope.submit = ->
         promise = $kinvey.User.login(
             username: $scope.email
@@ -101,7 +107,12 @@ app.controller("SignupCtrl", ($scope, $kinvey, $location) ->
     return
     )
 
-app.controller("SettingsCtrl", ($scope, $kinvey, $location, $rootScope) ->
+app.controller("SettingsCtrl", ($scope, $kinvey, $location, $rootScope, $ionicLoading) ->
+    $ionicLoading.show
+        content: "Loading"
+        animation: "fade-in"
+        showBackdrop: true
+        showDelay: 0
     $scope.templates = [{ name: 'navbar.html', url: '_partials/navbar.html'}]
     $scope.back_button = true
     $scope.activeuser = $kinvey.getActiveUser()
@@ -109,12 +120,16 @@ app.controller("SettingsCtrl", ($scope, $kinvey, $location, $rootScope) ->
     promise.then (languages) ->
         $scope.languages = languages
         $scope.currentLanguage = $scope.languages[selectActiveLanguage(languages, $scope.activeuser.nativelang)]
+        $ionicLoading.hide()
     $scope.submit = ->
         $scope.activeuser.nativelang = $scope.currentLanguage._id
         $scope.activeuser.speed = Number($scope.activeuser.speed)
         promise = $kinvey.User.update($scope.activeuser)
         promise.then (activeUser) ->
             $rootScope.back()
+    $scope.logout = ->
+        promise = $kinvey.User.logout()
+        $location.path("/login")
     return
     )
 

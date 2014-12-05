@@ -60,6 +60,10 @@ button.button-balanced:active{
 	/*text-align: left;*/
 }
 
+.logout-button{
+	float: right;
+}
+
 .icon.listen-icon:before {
   font-size: 18px !important;
 }
