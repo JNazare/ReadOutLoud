@@ -2,7 +2,7 @@
 <ion-content class="has-header">
 	<div class="list">
 		<ion-item class="item-avatar-right library-list" ng-repeat="book in books" href="#/book/{{book._id}}" ng-if="book.pages">
-			<img class="book-avatar" src="{{book.cover_id._downloadURL}}">
+			<img class="book-avatar" ng-src="{{book.cover_id._downloadURL}}">
 			<h3>{{book.title}}</h3>
 			<p>by {{book.author}}</p>
 		</ion-item>

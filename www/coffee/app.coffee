@@ -104,8 +104,7 @@ app.controller("SettingsCtrl", ($scope, $kinvey, $location, $rootScope) ->
     $scope.templates = [{ name: 'navbar.html', url: '_partials/navbar.html'}]
     $scope.back_button = true
     $scope.activeuser = $kinvey.getActiveUser()
-    query = new $kinvey.Query()
-    promise = $kinvey.DataStore.find('languages', query)
+    promise = $kinvey.DataStore.find('languages')
     promise.then (languages) ->
         $scope.languages = languages
         $scope.currentLanguage = $scope.languages[selectActiveLanguage(languages, $scope.activeuser.nativelang)]
@@ -153,33 +152,26 @@ app.controller("HomeCtrl", ($scope, $kinvey, $location) ->
 app.controller("AdminCtrl", ($scope, $kinvey, $location, $route) ->
     $scope.templates = [{ name: 'navbar.html', url: '_partials/navbar.html'}]
     $scope.back_button = true
-    promise = $kinvey.init(
-        appKey: "kid_bJe2dFWlU"
-        appSecret: "a22c88799ce248298aff031b96946969"
-        sync:
-            enable: true
-    )
-    promise.then (activeUser) ->
-        if(activeUser)
-            $scope.activeuser = activeUser
-            query = $kinvey.DataStore.find("books")
-            query.then (books) ->
-                $scope.books = books
-                $scope.deleteBook = (book) ->
-                    if(book.pages)
-                        i = 0
-                        while i < book.pages.length
-                            delete_file_id = book.pages[i].image._id
-                            delete_file_promise = $kinvey.File.destroy(delete_file_id)
-                            i++
-                    delete_cover_promise = $kinvey.File.destroy(book.cover_id._id)
-                    delete_book_promise = $kinvey.DataStore.destroy('books', book._id)
-                    $route.reload()
-                return
+    
+    $scope.activeuser = $kinvey.getActiveUser()
+    if($scope.activeuser)
+        query = $kinvey.DataStore.find("books")
+        query.then (books) ->
+            $scope.books = books
+            $scope.deleteBook = (book) ->
+                if(book.pages)
+                    i = 0
+                    while i < book.pages.length
+                        delete_file_id = book.pages[i].image._id
+                        delete_file_promise = $kinvey.File.destroy(delete_file_id)
+                        i++
+                delete_cover_promise = $kinvey.File.destroy(book.cover_id._id)
+                delete_book_promise = $kinvey.DataStore.destroy('books', book._id)
+                $route.reload()
             return
-        else
-            $location.path("/login")
-            return
+        return
+    else
+        $location.path("/login")
         return
     return
 )
@@ -192,36 +184,30 @@ app.controller "NewBookCtrl", [
   ($scope, $kinvey, $fileUpload, $location) ->
     $scope.templates = [{ name: 'navbar.html', url: '_partials/navbar.html'}]
     $scope.back_button = true
-    promise = $kinvey.init(
-        appKey: "kid_bJe2dFWlU"
-        appSecret: "a22c88799ce248298aff031b96946969"
-        sync:
-            enable: true
-    )
-    promise.then (activeUser) ->
-        if(activeUser)
-            $scope.uploadFile = ->
-                cover_image = $scope.myFile
-                upload_promise = $kinvey.File.upload(cover_image,
-                    mimeType: "image/jpeg"
-                    size: cover_image.size
+    
+    $scope.activeuser = $kinvey.getActiveUser()
+    if($scope.activeuser)
+        $scope.uploadFile = ->
+            cover_image = $scope.myFile
+            upload_promise = $kinvey.File.upload(cover_image,
+                mimeType: "image/jpeg"
+                size: cover_image.size
+            )
+            upload_promise.then (file) ->
+                page_promise = $kinvey.DataStore.save("books",
+                    title: $scope.title
+                    author: $scope.author
+                    cover_id: 
+                        _type: "KinveyFile"
+                        _id: file._id
+                    created_by: $scope.activeuser._id
                 )
-                upload_promise.then (file) ->
-                    page_promise = $kinvey.DataStore.save("books",
-                        title: $scope.title
-                        author: $scope.author
-                        cover_id: 
-                            _type: "KinveyFile"
-                            _id: file._id
-                        created_by: activeUser._id
-                    )
-                    page_promise.then (book) ->
-                        $scope.activeuser = activeUser
-                        $location.path("/admin")
-                return
-        else
-            $location.path("/login")
+                page_promise.then (book) ->
+                    $location.path("/admin")
             return
+    else
+        $location.path("/login")
+        return
 ]
 
 app.controller "NewPageCtrl", [
@@ -232,44 +218,39 @@ app.controller "NewPageCtrl", [
   ($scope, $kinvey, $fileUpload, $location) ->
     $scope.templates = [{ name: 'navbar.html', url: '_partials/navbar.html'}]
     $scope.back_button = true
-    promise = $kinvey.init(
-        appKey: "kid_bJe2dFWlU"
-        appSecret: "a22c88799ce248298aff031b96946969"
-        sync:
-            enable: true
-    )
-    promise.then (activeUser) ->
-        if(activeUser)
-            $scope.uploadFile = ->
-                cover_image = $scope.myFile
-                upload_promise = $kinvey.File.upload(cover_image,
-                    mimeType: "image/jpeg"
-                    size: cover_image.size
-                )
-                upload_promise.then (file) ->
-                    new_page = 
-                        text: $scope.text
-                        image: 
-                            _type: "KinveyFile"
-                            _id: file._id
-                    book_id = $location.path().split("/")[2]
-                    query = $kinvey.DataStore.get("books", book_id)
-                    query.then (book) ->
-                        if($scope.at_end)
-                            book.pages.push(new_page)
-                            page_promise = $kinvey.DataStore.save("books", book)
-                            page_promise.then (book) ->
-                                $location.path("/edit/"+book_id)
-                        else
-                           page_index = $location.path().split("/")[3]
-                           book.pages.splice(page_index, 0, new_page)
-                           page_promise = $kinvey.DataStore.save("books", book)
-                           page_promise.then (book) ->
-                                $location.path("/edit/"+book_id)
-                return
-        else
-            $location.path("/login")
+    
+    $scope.activeuser = $kinvey.getActiveUser()
+    if($scope.activeuser)
+        $scope.uploadFile = ->
+            cover_image = $scope.myFile
+            upload_promise = $kinvey.File.upload(cover_image,
+                mimeType: "image/jpeg"
+                size: cover_image.size
+            )
+            upload_promise.then (file) ->
+                new_page = 
+                    text: $scope.text
+                    image: 
+                        _type: "KinveyFile"
+                        _id: file._id
+                book_id = $location.path().split("/")[2]
+                query = $kinvey.DataStore.get("books", book_id)
+                query.then (book) ->
+                    if($scope.at_end)
+                        book.pages.push(new_page)
+                        page_promise = $kinvey.DataStore.save("books", book)
+                        page_promise.then (book) ->
+                            $location.path("/edit/"+book_id)
+                    else
+                       page_index = $location.path().split("/")[3]
+                       book.pages.splice(page_index, 0, new_page)
+                       page_promise = $kinvey.DataStore.save("books", book)
+                       page_promise.then (book) ->
+                            $location.path("/edit/"+book_id)
             return
+    else
+        $location.path("/login")
+        return
 ]
 
 app.controller "BookCtrl", [
@@ -283,74 +264,52 @@ app.controller "BookCtrl", [
   ($scope, $location, $kinvey, $ionicSlideBoxDelegate, $sce, $http, $ionicPopup) ->
     $scope.templates = [{ name: 'navbar.html', url: '_partials/navbar.html'}]
     $scope.back_button = true
-    $scope.selectedIndex = -1;
-    $scope.count = 0
-    word_count = 0
-    getuser = $kinvey.User.me()
-    getuser.then (activeUser) ->
-        $scope.activeuser = activeUser
-        $scope.translated_word = ""
-        $scope.selected_word = ""
-        $ionicSlideBoxDelegate.update()
-        book_id = $location.path().split("/")[2]
-        query = $kinvey.DataStore.get("books", book_id)
-        query.then (book) ->
-            new_pages = []
-            angular.forEach book.pages, (page) ->
-                new_pages.push
-                    image: page.image
-                    text: page.text
-                    listed_text: page.text.split(" ")
-            $scope.pages = new_pages
-            $ionicSlideBoxDelegate.update()
-            $scope.translateWord = (txt, $index) ->
-                $scope.selectedIndex = $index
-                txt = txt.trim()
-                txt = txt.replace(/["\.,-\/#!$%\^&\*;:{}=\-_`~()]/g,"")
-                link = "https://translation-app.herokuapp.com/api/en/"+activeUser.nativelang+"/"+txt
-                $http.get(link).success((data, status, headers, config) ->
-                    $scope.translated_word = data
-                    $scope.selected_word = txt
-                    speech1 = speakWord(txt, 'en')
-                    speech2 = speakWord(data, activeUser.nativelang)
-                    window.speechSynthesis.speak(speech1)
-                    window.speechSynthesis.speak(speech2)
-                    return
-                ).error (data, status, headers, config) ->
-                    return
-            $scope.clickMe = (clickEvent) ->
-                ct = 0
-                text = $scope.pages[clickEvent].text
-                speech = speakWord(text, 'en')
-                window.speechSynthesis.speak(speech)
+    $ionicSlideBoxDelegate.update()
+    
+    $scope.activeuser = $kinvey.getActiveUser()
+    $scope.selectedIndex = -1
+    book_id = $location.path().split("/")[2]
+
+    query = $kinvey.DataStore.get("books", book_id)
+    query.then (book) ->
+        new_pages = []
+        angular.forEach book.pages, (page) ->
+            new_pages.push
+                image: page.image
+                text: page.text
+                listed_text: page.text.split(" ")
+        $scope.pages = new_pages
+        promise = $kinvey.DataStore.find('languages')
+        promise.then (languages) ->
+            $scope.voice_code = languages[selectActiveLanguage(languages, $scope.activeuser.nativelang)].voice
+        $scope.translateWord = (txt, $index) ->
+            $scope.selectedIndex = $index
+            txt = txt.trim().replace(/["\.,-\/#!$%\^&\*;:{}=\-_`~()]/g,"")
+            link = "https://translation-app.herokuapp.com/api/en/"+$scope.activeuser.nativelang+"/"+txt
+            $http.get(link).success((data, status, headers, config) ->
+                $scope.translated_word = data
+                $scope.selected_word = txt
+                speech_english = speakText(txt, 'en-us', $scope.activeuser.speed)
+                speech_native = speakText(data, $scope.voice_code, $scope.activeuser.speed)
+                window.speechSynthesis.speak(speech_english)
+                window.speechSynthesis.speak(speech_native)
                 return
-            $scope.showPopup = (image) ->
-                tempate_string = '<img src="' + image + '" width="100%">'
-                alertPopup = $ionicPopup.alert(
-                    template: tempate_string
-                )
+            ).error (data, status, headers, config) ->
+                return
+        $scope.clickMe = (clickEvent) ->
+            text = $scope.pages[clickEvent].text
+            speech = speakText(text, 'en-us', $scope.activeuser.speed)
+            window.speechSynthesis.speak(speech)
             return
+        $scope.showPopup = (image) ->
+            tempate_string = '<img src="' + image + '" width="100%">'
+            alertPopup = $ionicPopup.alert(
+                template: tempate_string
+            )
+        return
         return
     return
 ]
-
-speakWord = (word, lang) ->
-    speechLang = {"es": "es-mx", "zh": "zh-cn", "ar": "ar-eg", "pt": "pt-br", "fr": "fr-fr", "de" : "de-de", "en" : "en-us"}
-    utterance = new SpeechSynthesisUtterance()
-    utterance.text = word
-    utterance.lang = speechLang[lang]
-    utterance.rate = 0.1 # activeUser.speed
-    return utterance
-    # window.speechSynthesis.speak(utterance)
-
-
-selectActiveLanguage = (languages, nativelang) ->
-    i = 0
-    while (i < languages.length)
-        if languages[i]._id==nativelang
-            break
-        i++
-    return i
 
 app.controller "EditCtrl", [
   "$scope"
@@ -365,48 +324,47 @@ app.controller "EditCtrl", [
   ($scope, $location, $kinvey, $ionicSlideBoxDelegate, $sce, $http, $fileUpload, $route, $filter) ->
     $scope.templates = [{ name: 'navbar.html', url: '_partials/navbar.html'}]
     $scope.back_button = true
-    getuser = $kinvey.User.me()
-    getuser.then (activeUser) ->
-        $scope.activeuser = activeUser
+    $scope.activeuser = $kinvey.getActiveUser()
+    $ionicSlideBoxDelegate.update()
+    
+    book_id = $location.path().split("/")[2]
+    query = $kinvey.DataStore.get("books", book_id)
+    query.then (book) ->
+        $scope.book_id = book._id
+        $scope.pages = book.pages
         $ionicSlideBoxDelegate.update()
-        book_id = $location.path().split("/")[2]
-        query = $kinvey.DataStore.get("books", book_id)
-        query.then (book) ->
-            $scope.book_id = book._id
-            $scope.pages = book.pages
-            $ionicSlideBoxDelegate.update()
-            $scope.uploadFile = (page_index) ->
-                page_image = $scope.myFile
-                if page_image
-                    delete_page_image_promise = $kinvey.File.destroy(book.pages[page_index].image._id)
-                    upload_promise = $kinvey.File.upload(page_image,
-                        mimeType: "image/jpeg"
-                        size: page_image.size
-                    )
-                    upload_promise.then (file) ->
-                        book.pages[page_index].image = 
-                            _id: file._id
-                            _type: "KinveyFile"
-                        book.pages[page_index].text = $scope.text
-                        updated_page_promise = $kinvey.DataStore.save('books', book)
-                        updated_page_promise.then (page) ->
-                            $route.reload()
-                else
+        $scope.uploadFile = (page_index) ->
+            page_image = $scope.myFile
+            if page_image
+                delete_page_image_promise = $kinvey.File.destroy(book.pages[page_index].image._id)
+                upload_promise = $kinvey.File.upload(page_image,
+                    mimeType: "image/jpeg"
+                    size: page_image.size
+                )
+                upload_promise.then (file) ->
+                    book.pages[page_index].image = 
+                        _id: file._id
+                        _type: "KinveyFile"
                     book.pages[page_index].text = $scope.text
                     updated_page_promise = $kinvey.DataStore.save('books', book)
                     updated_page_promise.then (page) ->
                         $route.reload()
-            $scope.deletePage = (page_index) ->
-                delete_page_image_promise = $kinvey.File.destroy(book.pages[page_index].image._id)
-                book.pages.splice(page_index, 1)
-                delete_page_promise = $kinvey.DataStore.save('books', book)
-                delete_page_promise.then (page) ->
+            else
+                book.pages[page_index].text = $scope.text
+                updated_page_promise = $kinvey.DataStore.save('books', book)
+                updated_page_promise.then (page) ->
                     $route.reload()
-            return
+        $scope.deletePage = (page_index) ->
+            delete_page_image_promise = $kinvey.File.destroy(book.pages[page_index].image._id)
+            book.pages.splice(page_index, 1)
+            delete_page_promise = $kinvey.DataStore.save('books', book)
+            delete_page_promise.then (page) ->
+                $route.reload()
         return
     return
 ]
 
+# App directives
 app.directive "fileModel", [
   "$parse"
   ($parse) ->
@@ -424,6 +382,7 @@ app.directive "fileModel", [
         )
 ]
 
+# App services
 app.service "fileUpload", [
   "$http"
   ($http) ->
@@ -438,6 +397,23 @@ app.service "fileUpload", [
         ).error ->
         return
 ]
+
+# Helper functions
+speakText = (word, voice_code, speed) ->
+    utterance = new SpeechSynthesisUtterance()
+    utterance.text = word
+    utterance.lang = voice_code
+    utterance.rate = speed
+    return utterance
+
+
+selectActiveLanguage = (languages, nativelang) ->
+    i = 0
+    while (i < languages.length)
+        if languages[i]._id==nativelang
+            break
+        i++
+    return i
 
 
 app.run ($ionicPlatform, $rootScope, $location) ->
