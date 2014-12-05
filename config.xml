@@ -1,12 +1,12 @@
 <?xml version="1.0" encoding="UTF-8" standalone="yes"?>
 <widget id="com.l0e.storyteller" version="0.0.1" xmlns="http://www.w3.org/ns/widgets" xmlns:cdv="http://cordova.apache.org/ns/1.0">
-  <name>Storyteller</name>
+  <name>Read Out Loud</name>
   <description>
-        MLW Project
-    </description>
+        Learn English while reading with your kids
+  </description>
   <author email="juliana@media.mit.edu" href="http://learn.media.mit.edu">
-      Juliana Nazare
-    </author>
+      Juliana Nazaré
+  </author>
   <content src="index.html"/>
   <access origin="*"/>
   <preference name="webviewbounce" value="false"/>

@@ -92,6 +92,7 @@ app.controller("SignupCtrl", ($scope, $kinvey, $location) ->
             nativelang: $scope.nativelang
             email: $scope.email
             speed: 0.1
+            role: "user"
         )
         promise.then (activeUser) ->
             $scope.activeuser = activeUser
@@ -109,20 +110,11 @@ app.controller("SettingsCtrl", ($scope, $kinvey, $location, $rootScope) ->
         $scope.languages = languages
         $scope.currentLanguage = $scope.languages[selectActiveLanguage(languages, $scope.activeuser.nativelang)]
     $scope.submit = ->
-        if($scope.currentLanguage)
-            $scope.activeuser.nativelang = $scope.currentLanguage._id
-            promise = $kinvey.User.update($scope.activeuser)
-            promise.then (activeUser) ->
-                $rootScope.back()
-            return
-        if($scope.activeuser.speed)
-            $scope.activeuser.speed = $scope.activeuser.speed
-            promise = $kinvey.User.update($scope.activeuser)
-            promise.then (activeUser) ->
-                $rootScope.back()
-                return
-            return
-        $rootScope.back()
+        $scope.activeuser.nativelang = $scope.currentLanguage._id
+        $scope.activeuser.speed = Number($scope.activeuser.speed)
+        promise = $kinvey.User.update($scope.activeuser)
+        promise.then (activeUser) ->
+            $rootScope.back()
     return
     )
 
@@ -261,7 +253,8 @@ app.controller "BookCtrl", [
   "$sce"
   "$http"
   "$ionicPopup"
-  ($scope, $location, $kinvey, $ionicSlideBoxDelegate, $sce, $http, $ionicPopup) ->
+  "$ionicPopover"
+  ($scope, $location, $kinvey, $ionicSlideBoxDelegate, $sce, $http, $ionicPopup, $ionicPopover) ->
     $scope.templates = [{ name: 'navbar.html', url: '_partials/navbar.html'}]
     $scope.back_button = true
     $ionicSlideBoxDelegate.update()
@@ -282,13 +275,14 @@ app.controller "BookCtrl", [
         promise = $kinvey.DataStore.find('languages')
         promise.then (languages) ->
             $scope.voice_code = languages[selectActiveLanguage(languages, $scope.activeuser.nativelang)].voice
-        $scope.translateWord = (txt, $index) ->
+        $scope.translateWord = ($event, txt, $index) ->
             $scope.selectedIndex = $index
             txt = txt.trim().replace(/["\.,-\/#!$%\^&\*;:{}=\-_`~()]/g,"")
             link = "https://translation-app.herokuapp.com/api/en/"+$scope.activeuser.nativelang+"/"+txt
             $http.get(link).success((data, status, headers, config) ->
                 $scope.translated_word = data
                 $scope.selected_word = txt
+                $scope.popover.show $event
                 speech_english = speakText(txt, 'en-us', $scope.activeuser.speed)
                 speech_native = speakText(data, $scope.voice_code, $scope.activeuser.speed)
                 window.speechSynthesis.speak(speech_english)
@@ -297,17 +291,49 @@ app.controller "BookCtrl", [
             ).error (data, status, headers, config) ->
                 return
         $scope.clickMe = (clickEvent) ->
+            console.log 'here'
             text = $scope.pages[clickEvent].text
             speech = speakText(text, 'en-us', $scope.activeuser.speed)
             window.speechSynthesis.speak(speech)
-            return
         $scope.showPopup = (image) ->
             tempate_string = '<img src="' + image + '" width="100%">'
             alertPopup = $ionicPopup.alert(
                 template: tempate_string
+                buttons: [
+                    {
+                        text: "<strong>OK</strong>"
+                        type: "button-balanced"
+                    }
+                ]
             )
+    $ionicPopover.fromTemplateUrl("_partials/translation.html",
+        scope: $scope
+    ).then (popover) ->
+        $scope.popover = popover
         return
+
+    $scope.openPopover = ($event) ->
+        $scope.popover.show $event
         return
+
+    $scope.closePopover = ->
+        $scope.selectedIndex = -1
+        $scope.popover.hide()
+        return
+
+    $scope.$on "$destroy", ->
+        $scope.selectedIndex = -1
+        $scope.popover.remove()
+        return
+
+    $scope.$on "popover.hidden", ->
+        $scope.selectedIndex = -1
+        return
+
+    $scope.$on "popover.removed", ->
+        $scope.selectedIndex = -1
+        return
+
     return
 ]
 
