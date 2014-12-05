@@ -1,50 +1,42 @@
-<ion-header-bar class="bar-positive">
-    <a ng-click='back()' class="no_decoration">
-        <button class="button button-clear icon ion-chevron-left"></button>
-    </a>
-    <h1 class="title"><a href="#/" class="no_decoration">Storyteller</a></h1>
-    <a href="#/settings">
-      <button ng-if="activeuser" class="button button-clear icon ion-gear-a settings-button"></button>
-    </a>
-</ion-header-bar>
-<ion-content>
-  <ion-slide-box on-slide-changed="slideHasChanged($index)" show-pager="false">
-    <ion-slide ng-repeat="page in pages">
-      <div ng-controller="EditCtrl" class="list card edit-card">
-        <div class="item item-divider page-thumbnail-holder">
-          <div class="row">
-            <div class="col edit-thumbnail-div">
-              <img class="edit-thumbnail-image" src="{{page.image._downloadURL}}">
-            </div>
-            <div class="col col-top delete-page-div">
-              <button class="button button-assertive button-clear delete-page-button" ng-click="deletePage($index)">
-                <i class="icon ion-close"></i>
-              </button>
-            </div>
-          </div>
-          <div class="row">
-            <div class="col">
-              <input type="file" file-model="myFile" class="edit-page-photo">
-            </div>
-          </div>
-        </div>
-        <div class="item item-text-wrap page-card">
-          <textarea class="edit-text" name="text" cols="40" rows="5" ng-model="text" ng-init="text=page.text"></textarea>
-          <button class="button button-full button-light save-edits-button" ng-click="uploadFile($index)">
-            Save
-          </button>
-        </div>
-        <a class="no_decoration" href="#/new_page/{{book_id}}/{{$index}}">
-          <button class="button button-balanced button-clear add-page-button">
-              <i class="icon ion-plus"></i>
-          </button>
-        </a>
-      </div>
-    </ion-slide>
-    <a ng-if="pages.length==0" class="no-decoration" href="#/new_page/{{book_id}}/0">
-      <button class="button button-balanced button-full col-middle">
-          Add New Page 
-      </button>
-    </a>
-  </ion-slide-box>
+<ion-header-bar class="navbar-color" ng-include="templates[0].url"></ion-header-bar>
+<ion-content class="has-header">
+	<ion-slide-box on-slide-changed="slideHasChanged($index)" show-pager="false">
+		<ion-slide ng-repeat="page in pages">
+			<div ng-controller="EditCtrl" class="list card edit-card">
+				<div class="item item-divider page-thumbnail-holder">
+					<div class="row">
+						<div class="col edit-thumbnail-div">
+							<img class="edit-thumbnail-image" ng-src="{{page.image._downloadURL}}">
+						</div>
+						<div class="col col-top delete-page-div">
+							<button class="button button-assertive button-clear delete-page-button" ng-click="deletePage($index)">
+								<i class="icon ion-close"></i>
+							</button>
+						</div>
+					</div>
+					<div class="row">
+						<div class="col">
+							<input type="file" file-model="myFile" class="edit-page-photo">
+						</div>
+					</div>
+				</div>
+				<div class="item item-text-wrap page-card">
+					<textarea class="edit-text" name="text" cols="40" rows="5" ng-model="text" ng-init="text=page.text"></textarea>
+					<button class="button button-full button-light save-edits-button" ng-click="uploadFile($index)">
+						Save
+					</button>
+				</div>
+				<a class="no_decoration" href="#/new_page/{{book_id}}/{{$index}}">
+					<button class="button button-balanced button-clear add-page-button">
+						<i class="icon ion-plus"></i>
+					</button>
+				</a>
+			</div>
+		</ion-slide>
+		<a ng-if="pages.length==0" class="no-decoration" href="#/new_page/{{book_id}}/0">
+			<button class="button button-balanced button-full col-middle">
+				Add New Page 
+			</button>
+		</a>
+	</ion-slide-box>
 </ion-content>

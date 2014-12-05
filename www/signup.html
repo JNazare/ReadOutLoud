@@ -1,39 +1,31 @@
-<ion-header-bar class="bar-positive">
-	<a ng-click='back()' class="no_decoration">
-        <button class="button button-clear icon ion-chevron-left"></button>
-    </a>
-    <h1 class="title"><a href="#/" class="no_decoration">Storyteller</a></h1>
-    <a href="#/settings">
-    	<button ng-if="activeuser" class="button button-clear icon ion-gear-a settings-button"></button>
-    </a>
-</ion-header-bar>
-<ion-content>
+<ion-header-bar class="navbar-color" ng-include="templates[0].url"></ion-header-bar>
+<ion-content class="has-header">
 	<form ng-submit="submit()" name="signupForm" ng-controller="SignupCtrl" class="signup-form">
 		<div class="list list-inset">
-		  <label class="item item-input">
-		    <input name="email" ng-model="email" type="email" placeholder="Email" required>
-		  </label>
-		  <label class="item item-input">
-		    <input name="password" ng-model="password" type="password" placeholder="Password" required>
-		  </label>
-		  <div class="list">
-			  <label class="item item-input item-select">
-			    <div class="input-label">
-			      Native Language
-			    </div>
-			    <select name="nativelang" ng-model="nativelang" required>
-			      <option value="es" selected>Spanish</option>
-			      <option value="zh">Chinese</option>
-			      <option value="ar">Arabic</option>
-			      <option value="pt">Portuguese</option>
-			      <option value="fr">French</option>
-			      <option value="de">German</option>
-			    </select>
-			  </label>
-		  </div>
-		  <button type="submit" class="button button-block button-stable">
-		    Sign Up
-		  </button>
+			<label class="item item-input">
+				<input name="email" ng-model="email" type="email" placeholder="Email" required>
+			</label>
+			<label class="item item-input">
+				<input name="password" ng-model="password" type="password" placeholder="Password" required>
+			</label>
+			<div class="list">
+				<label class="item item-input item-select">
+					<div class="input-label">
+						Native Language
+					</div>
+					<select name="nativelang" ng-model="nativelang" required>
+						<option value="es" selected>Spanish</option>
+						<option value="zh">Chinese</option>
+						<option value="ar">Arabic</option>
+						<option value="pt">Portuguese</option>
+						<option value="fr">French</option>
+						<option value="de">German</option>
+					</select>
+				</label>
+			</div>
+			<button type="submit" class="button button-block button-stable">
+				Sign Up
+			</button>
 		</div>
 	</form>
 </ion-content>

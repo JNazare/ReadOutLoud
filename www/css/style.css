@@ -1,22 +1,3 @@
-
-@font-face{ 
-	font-family: 'Chunky';
-	src: url('../fonts/chunky/chunky-webfont.eot');
-	src: url('../fonts/chunky/chunky-webfont.eot?#iefix') format('embedded-opentype'),
-	     url('../fonts/chunky/chunky-webfont.woff') format('woff'),
-	     url('../fonts/chunky/chunky-webfont.ttf') format('truetype'),
-	     url('../fonts/chunky/chunky-webfont.svg#webfont') format('svg');
-}
-
-@font-face{ 
-	font-family: 'Junction';
-	src: url('../fonts/junction/Junction-webfont.eot');
-	src: url('../fonts/junction/Junction-webfont.eot?#iefix') format('embedded-opentype'),
-	     url('../fonts/junction/Junction-webfont.woff') format('woff'),
-	     url('../fonts/junction/Junction-webfont.ttf') format('truetype'),
-	     url('../fonts/junction/Junction-webfont.svg#webfont') format('svg');
-}
-
 .library-list:first-child{
 	border-top: none;
 }
