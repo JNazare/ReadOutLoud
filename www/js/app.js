@@ -283,7 +283,7 @@
                 _type: "KinveyFile",
                 _id: file._id
               },
-              created_by: $scope.activeuser._id,
+              creator: $scope.activeuser._id,
               pages: []
             });
             return page_promise.then(function(book) {
@@ -573,11 +573,7 @@
           book.pages.splice(page_num, 1);
           delete_page_promise = $kinvey.DataStore.save('books', book);
           return delete_page_promise.then(function(book) {
-            if (book.pages.length > 0) {
-              return $route.reload();
-            } else {
-              return $location.path("/edit/" + book_id);
-            }
+            return $location.path("/edit/" + book_id);
           });
         };
       });

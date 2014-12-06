@@ -238,7 +238,7 @@ app.controller "NewBookCtrl", [
                     cover_id: 
                         _type: "KinveyFile"
                         _id: file._id
-                    created_by: $scope.activeuser._id
+                    creator: $scope.activeuser._id
                     pages: []
                 )
                 page_promise.then (book) ->
@@ -512,10 +512,7 @@ app.controller "EditPageCtrl", [
             book.pages.splice(page_num, 1)
             delete_page_promise = $kinvey.DataStore.save('books', book)
             delete_page_promise.then (book) ->
-                if book.pages.length > 0
-                    $route.reload()
-                else
-                    $location.path("/edit/"+book_id)
+                $location.path("/edit/"+book_id)
     ]
 
 app.controller "EditCtrl", [
