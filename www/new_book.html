@@ -2,19 +2,23 @@
 <ion-content class="has-header">
 	<form name="newBookForm" ng-controller="NewBookCtrl" class="new-book-form">
 		<div class="list list-inset">
-			<div class="list">
-				<label class="item item-input">
-					<input name="title" ng-model="title" type="text" placeholder="Title" required>
-				</label>
-				<label class="item item-input">
-					<input name="author" ng-model="author" type="text" placeholder="Author" required>
-				</label>
-				<label class="item item-input">
-					<input type="file" file-model="myFile"/>
-				</label>
+			<div class="item item-divider">
+				Enter book info
 			</div>
-			<button ng-click="uploadFile()" class="button button-block button-stable">
-				Create
+			<label class="item item-input">
+				<input name="title" ng-model="title" type="text" placeholder="Title" required>
+			</label>
+			<label class="item item-input">
+				<input name="author" ng-model="author" type="text" placeholder="Author" required>
+			</label>
+			<div class="item item-divider">
+				Upload a photo of the cover
+			</div>
+			<label class="item item-input">
+				<input type="file" file-model="myFile"/>
+			</label>
+			<button ng-click="uploadFile()" class="button button-block button-balanced">
+				Create New Book
 			</button>
 		</div>
 	</form>

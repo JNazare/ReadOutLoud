@@ -1,5 +1,5 @@
 <ion-header-bar class="bar-dark navbar-color" ng-include="templates[0].url"></ion-header-bar>
-<ion-content class="has-header">
+<ion-content class="has-header has-footer">
 	<ion-slide-box on-slide-changed="slideHasChanged($index)" show-pager="false">
 		<ion-slide ng-repeat="page in pages">
 			<div ng-controller="EditCtrl" class="list card edit-card">
@@ -33,10 +33,19 @@
 				</a>
 			</div>
 		</ion-slide>
-		<a ng-if="pages.length==0" class="no-decoration" href="#/new_page/{{book_id}}/0">
-			<button class="button button-balanced button-full col-middle">
-				Add New Page 
-			</button>
-		</a>
 	</ion-slide-box>
+	<div class="no-pages" ng-if="pages.length==0">
+		<img ng-src="/img/pages.png" width="50%">
+		<p> Get started by adding pages </p>
+	</div>
 </ion-content>
+<a class="no_decoration" href="#/new_page/{{book_id}}/0">
+	<div class="bar bar-footer bar-balanced">
+	  	<div class="title">+ Add Page</div>
+	</div>
+</a>
+<!-- <a ng-if="pages.length==0" class="no-decoration" href="#/new_page/{{book_id}}/0">
+	<button class="button button-balanced button-full col-middle">
+		Add New Page 
+	</button>
+</a> -->

@@ -2,11 +2,24 @@
 (function() {
   var app, selectActiveLanguage, speakText;
 
-  app = angular.module("storyteller", ["ionic", "ngRoute", "kinvey"]);
+  app = angular.module("storyteller", ["ionic", "ngRoute", "kinvey", "base64"]);
 
   app.config(function($compileProvider) {
     $compileProvider.aHrefSanitizationWhitelist(/^\s*(https?|ftp|mailto|file|tel):/);
   });
+
+  app.config(function($sceDelegateProvider) {
+    $sceDelegateProvider.resourceUrlWhitelist(["self", "http://0.0.0.0:3000/**"]);
+  });
+
+  app.config([
+    "$httpProvider", function($httpProvider) {
+      $httpProvider.defaults.headers.common = {};
+      $httpProvider.defaults.headers.post = {};
+      $httpProvider.defaults.headers.put = {};
+      return $httpProvider.defaults.headers.patch = {};
+    }
+  ]);
 
   app.config(function($routeProvider, $locationProvider) {
     $routeProvider.when("/", {
@@ -262,10 +275,11 @@
                 _type: "KinveyFile",
                 _id: file._id
               },
-              created_by: $scope.activeuser._id
+              created_by: $scope.activeuser._id,
+              pages: []
             });
             return page_promise.then(function(book) {
-              return $location.path("/admin");
+              return $location.path("/edit/" + book._id);
             });
           });
         };
@@ -276,7 +290,8 @@
   ]);
 
   app.controller("NewPageCtrl", [
-    "$scope", "$kinvey", "fileUpload", "$location", function($scope, $kinvey, $fileUpload, $location) {
+    "$scope", "$kinvey", "fileUpload", "$location", "$http", "$base64", function($scope, $kinvey, $fileUpload, $location, $http, $base64) {
+      var OCRFile, OCRImage, OCRPath, call;
       $scope.templates = [
         {
           name: 'navbar.html',
@@ -284,10 +299,57 @@
         }
       ];
       $scope.back_button = true;
+      $scope.text = "";
+      $scope.stage = 0;
+      OCRImage = function(image) {
+        var canvas;
+        canvas = document.createElement("canvas");
+        canvas.width = image.naturalWidth;
+        canvas.height = image.naturalHeight;
+        canvas.getContext("2d").drawImage(image, 0, 0);
+        return OCRAD(canvas);
+      };
+      OCRPath = function(url, callback) {
+        var image;
+        image = new Image();
+        image.src = url;
+        image.onload = function() {
+          callback(OCRImage(image));
+        };
+      };
+      OCRFile = function(file, callback) {
+        var reader;
+        reader = new FileReader();
+        reader.onload = function() {
+          OCRPath(reader.result, callback);
+        };
+        reader.readAsDataURL(file);
+      };
+      call = function(text) {
+        $scope.text = text;
+        return text;
+      };
+      $scope.file_changed = function(element, s) {
+        var imgtag, reader, selectedFile, text;
+        text = OCRFile(element.files[0], call);
+        selectedFile = element.files[0];
+        reader = new FileReader();
+        imgtag = document.getElementById("myimage");
+        imgtag.title = selectedFile.name;
+        reader.onload = function(event) {
+          imgtag.src = event.target.result;
+        };
+        reader.readAsDataURL(selectedFile);
+      };
       $scope.activeuser = $kinvey.getActiveUser();
       if ($scope.activeuser) {
+        $scope.uploadPage = function() {
+          console.log($scope.text);
+          return $scope.stage = $scope.stage + 1;
+        };
         return $scope.uploadFile = function() {
           var cover_image, upload_promise;
+          console.log($scope.myFile);
           cover_image = $scope.myFile;
           upload_promise = $kinvey.File.upload(cover_image, {
             mimeType: "image/jpeg",
@@ -439,6 +501,7 @@
       ];
       $scope.back_button = true;
       $scope.activeuser = $kinvey.getActiveUser();
+      console.log($scope.activeuser);
       $ionicSlideBoxDelegate.update();
       book_id = $location.path().split("/")[2];
       query = $kinvey.DataStore.get("books", book_id);

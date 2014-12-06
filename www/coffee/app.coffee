@@ -2,12 +2,30 @@ app = angular.module("storyteller", [
     "ionic"
     "ngRoute"
     "kinvey"
+    "base64"
 ])
 
 app.config(($compileProvider) ->
     $compileProvider.aHrefSanitizationWhitelist /^\s*(https?|ftp|mailto|file|tel):/
     return
 )
+
+app.config ($sceDelegateProvider) ->
+    $sceDelegateProvider.resourceUrlWhitelist [
+        "self"
+        "http://0.0.0.0:3000/**"
+    ]
+    return
+
+app.config [
+  "$httpProvider"
+  ($httpProvider) ->
+    #Reset headers to avoid OPTIONS request (aka preflight)
+    $httpProvider.defaults.headers.common = {}
+    $httpProvider.defaults.headers.post = {}
+    $httpProvider.defaults.headers.put = {}
+    $httpProvider.defaults.headers.patch = {}
+]
 
 app.config(($routeProvider, $locationProvider) ->
 
@@ -214,9 +232,10 @@ app.controller "NewBookCtrl", [
                         _type: "KinveyFile"
                         _id: file._id
                     created_by: $scope.activeuser._id
+                    pages: []
                 )
                 page_promise.then (book) ->
-                    $location.path("/admin")
+                    $location.path("/edit/"+book._id)
             return
     else
         $location.path("/login")
@@ -228,13 +247,61 @@ app.controller "NewPageCtrl", [
   "$kinvey"
   "fileUpload"
   "$location"
-  ($scope, $kinvey, $fileUpload, $location) ->
+  "$http"
+  "$base64"
+  ($scope, $kinvey, $fileUpload, $location, $http, $base64) ->
     $scope.templates = [{ name: 'navbar.html', url: '_partials/navbar.html'}]
     $scope.back_button = true
-    
+    $scope.text = ""
+    $scope.stage = 0
+
+    OCRImage = (image) ->
+        canvas = document.createElement("canvas")
+        canvas.width = image.naturalWidth
+        canvas.height = image.naturalHeight
+        canvas.getContext("2d").drawImage image, 0, 0
+        OCRAD canvas
+      
+    OCRPath = (url, callback) ->
+        image = new Image()
+        image.src = url
+        image.onload = ->
+            callback OCRImage(image)
+            return
+        return
+      
+    OCRFile = (file, callback) ->
+        reader = new FileReader()
+        reader.onload = ->
+            OCRPath reader.result, callback
+            return
+        reader.readAsDataURL file
+        return
+
+    call = (text) ->
+        $scope.text = text
+        return text
+
+    $scope.file_changed = (element, s) ->
+        text = OCRFile(element.files[0], call)
+        selectedFile = element.files[0]
+        reader = new FileReader()
+        imgtag = document.getElementById("myimage")
+        imgtag.title = selectedFile.name
+        reader.onload = (event) ->
+            imgtag.src = event.target.result
+            return
+        reader.readAsDataURL(selectedFile)
+        return
+
     $scope.activeuser = $kinvey.getActiveUser()
     if($scope.activeuser)
+        $scope.uploadPage = ->
+            console.log $scope.text
+            $scope.stage = $scope.stage + 1
+
         $scope.uploadFile = ->
+            console.log $scope
             cover_image = $scope.myFile
             upload_promise = $kinvey.File.upload(cover_image,
                 mimeType: "image/jpeg"
@@ -380,6 +447,7 @@ app.controller "EditCtrl", [
     $scope.templates = [{ name: 'navbar.html', url: '_partials/navbar.html'}]
     $scope.back_button = true
     $scope.activeuser = $kinvey.getActiveUser()
+    console.log $scope.activeuser
     $ionicSlideBoxDelegate.update()
     
     book_id = $location.path().split("/")[2]
