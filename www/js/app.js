@@ -167,6 +167,7 @@
     $scope.submit = function() {
       $scope.activeuser.nativelang = $scope.currentLanguage._id;
       $scope.activeuser.speed = Number($scope.activeuser.speed);
+      $scope.activeuser.run_ocr = $scope.ocr;
       promise = $kinvey.User.update($scope.activeuser);
       return promise.then(function(activeUser) {
         return $rootScope.back();
@@ -339,8 +340,11 @@
       };
       $scope.file_changed = function(element, s) {
         var imgtag, reader, selectedFile, text;
+        $scope.text = "";
+        if ($scope.activeuser.ocr === true) {
+          text = OCRFile(element.files[0], call);
+        }
         $scope.myFile = element.files[0];
-        text = OCRFile(element.files[0], call);
         selectedFile = element.files[0];
         reader = new FileReader();
         imgtag = document.getElementById("myimage");
@@ -358,6 +362,7 @@
         };
         return $scope.uploadFile = function() {
           var cover_image, upload_promise;
+          console.log($scope);
           $ionicLoading.show({
             content: "Loading",
             animation: "fade-in",
@@ -371,6 +376,7 @@
           });
           upload_promise.then(function(file) {
             var book_id, new_page, query;
+            console.log($scope.text);
             new_page = {
               text: $scope.text,
               image: {
@@ -522,7 +528,7 @@
         $scope.book = book;
         $scope.page = book.pages[page_num];
         $scope.text = $scope.page.text;
-        $scope.page_num = page_num;
+        $scope.page_num = Number(page_num) + 1;
         console.log($scope.page);
         $ionicLoading.hide();
         $scope.showPopup = function(image) {

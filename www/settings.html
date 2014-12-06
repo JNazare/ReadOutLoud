@@ -22,6 +22,15 @@
 					ng-options="l.name for l in languages track by l._id">
 				</select>
 		  	</label>
+		  	<label class="item item-toggle">
+		     	Run OCR
+		     	<label class="toggle toggle-assertive">
+		       		<input type="checkbox" ng-model="ocr">
+		       		<div class="track">
+		         		<div class="handle"></div>
+		       		</div>
+		     	</label>
+		    </label>
 			<button type="submit" class="button button-block button-balanced">
 				<strong> Save </strong>
 			</button>

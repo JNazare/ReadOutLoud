@@ -146,6 +146,7 @@ app.controller("SettingsCtrl", ($scope, $kinvey, $location, $rootScope, $ionicLo
     $scope.submit = ->
         $scope.activeuser.nativelang = $scope.currentLanguage._id
         $scope.activeuser.speed = Number($scope.activeuser.speed)
+        $scope.activeuser.run_ocr = $scope.ocr
         promise = $kinvey.User.update($scope.activeuser)
         promise.then (activeUser) ->
             $rootScope.back()
@@ -291,8 +292,10 @@ app.controller "NewPageCtrl", [
         return text
 
     $scope.file_changed = (element, s) ->
+        $scope.text=""
+        if ($scope.activeuser.ocr==true)
+            text = OCRFile(element.files[0], call)
         $scope.myFile = element.files[0]
-        text = OCRFile(element.files[0], call)
         selectedFile = element.files[0]
         reader = new FileReader()
         imgtag = document.getElementById("myimage")
@@ -310,6 +313,7 @@ app.controller "NewPageCtrl", [
             $scope.stage = $scope.stage + 1
 
         $scope.uploadFile = ->
+            console.log $scope
             $ionicLoading.show
                 content: "Loading"
                 animation: "fade-in"
@@ -321,6 +325,7 @@ app.controller "NewPageCtrl", [
                 size: cover_image.size
             )
             upload_promise.then (file) ->
+                console.log $scope.text
                 new_page = 
                     text: $scope.text
                     image: 
@@ -472,7 +477,7 @@ app.controller "EditPageCtrl", [
         $scope.book = book
         $scope.page = book.pages[page_num]
         $scope.text = $scope.page.text
-        $scope.page_num = page_num
+        $scope.page_num = Number(page_num)+1
         console.log $scope.page
         $ionicLoading.hide()
         $scope.showPopup = (image) ->
