@@ -10,26 +10,10 @@
 				</div>
 				<label ng-if="stage==0" class="item item-input">
 					<input type="file" file-model="myFile"  accept="image/*" resize-max-height="300" resize-max-width="250" resize-quality="0.1" onchange="angular.element(this).scope().file_changed(this)"/>
+					<img id="myimage" ng-if="stage==0" width="100%">
 				</label>
-				<img id="myimage" width="100%">
-				<!-- <div class="item item-divider">
-					Text
-				</div> -->
 				<label ng-if="stage==1" class="item item-input">
 					<textarea name="text" cols="40" rows="5" ng-model="text"></textarea>
-				</label>
-				<!-- <label ng-if="{{scanned_text}}" class="item item-input">
-					<input name="text" ng-model="text" type="text" placeholder="Text..." required>
-				</label> -->
-				<!-- <img id="OCRImage" ng-src="/img/message.png"> -->
-				<label ng-if="stage==1" class="item item-toggle">
-					Insert at End
-					<label class="toggle">
-						 <input type="checkbox" ng-model="at_end">
-						 <div class="track">
-							 <div class="handle"></div>
-						 </div>
-					</label>
 				</label>
 				<button ng-if="stage==0" ng-click="uploadPage()" class="button button-block button-stable">
 					Scan Page For Text

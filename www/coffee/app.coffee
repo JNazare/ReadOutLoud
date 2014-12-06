@@ -61,6 +61,10 @@ app.config(($routeProvider, $locationProvider) ->
         templateUrl: "edit.html"
         controller: "EditCtrl"
 
+    $routeProvider.when "/edit_page/:book_id/:page_num",
+        templateUrl: "edit_page.html"
+        controller: "EditPageCtrl"
+
     $routeProvider.when "/new_page/:book_id/:after",
         templateUrl: "new_page.html"
         controller: "NewPageCtrl"
@@ -186,8 +190,11 @@ app.controller("AdminCtrl", ($scope, $kinvey, $location, $route) ->
     
     $scope.activeuser = $kinvey.getActiveUser()
     if($scope.activeuser)
-        query = $kinvey.DataStore.find("books")
-        query.then (books) ->
+        query = new $kinvey.Query()
+        if($scope.activeuser.role == "user")
+            query.equalTo('creator', $scope.activeuser._id)
+        promise = $kinvey.DataStore.find("books", query)
+        promise.then (books) ->
             $scope.books = books
             $scope.deleteBook = (book) ->
                 if(book.pages)
@@ -249,7 +256,8 @@ app.controller "NewPageCtrl", [
   "$location"
   "$http"
   "$base64"
-  ($scope, $kinvey, $fileUpload, $location, $http, $base64) ->
+  "$ionicLoading"
+  ($scope, $kinvey, $fileUpload, $location, $http, $base64, $ionicLoading) ->
     $scope.templates = [{ name: 'navbar.html', url: '_partials/navbar.html'}]
     $scope.back_button = true
     $scope.text = ""
@@ -283,6 +291,7 @@ app.controller "NewPageCtrl", [
         return text
 
     $scope.file_changed = (element, s) ->
+        $scope.myFile = element.files[0]
         text = OCRFile(element.files[0], call)
         selectedFile = element.files[0]
         reader = new FileReader()
@@ -301,7 +310,11 @@ app.controller "NewPageCtrl", [
             $scope.stage = $scope.stage + 1
 
         $scope.uploadFile = ->
-            console.log $scope
+            $ionicLoading.show
+                content: "Loading"
+                animation: "fade-in"
+                showBackdrop: true
+                showDelay: 0
             cover_image = $scope.myFile
             upload_promise = $kinvey.File.upload(cover_image,
                 mimeType: "image/jpeg"
@@ -316,17 +329,11 @@ app.controller "NewPageCtrl", [
                 book_id = $location.path().split("/")[2]
                 query = $kinvey.DataStore.get("books", book_id)
                 query.then (book) ->
-                    if($scope.at_end)
-                        book.pages.push(new_page)
-                        page_promise = $kinvey.DataStore.save("books", book)
-                        page_promise.then (book) ->
-                            $location.path("/edit/"+book_id)
-                    else
-                       page_index = $location.path().split("/")[3]
-                       book.pages.splice(page_index, 0, new_page)
-                       page_promise = $kinvey.DataStore.save("books", book)
-                       page_promise.then (book) ->
-                            $location.path("/edit/"+book_id)
+                    book.pages.push(new_page)
+                    page_promise = $kinvey.DataStore.save("books", book)
+                    page_promise.then (book) ->
+                        $location.path("/edit/"+book_id)
+                        $ionicLoading.hide()
             return
     else
         $location.path("/login")
@@ -433,6 +440,84 @@ app.controller "BookCtrl", [
     return
 ]
 
+app.controller "EditPageCtrl", [
+  "$scope"
+  "$location"
+  "$kinvey"
+  "$ionicSlideBoxDelegate"
+  "$sce"
+  "$http"
+  "$ionicPopup"
+  "$ionicPopover"
+  "$ionicLoading"
+  "$route"
+  ($scope, $location, $kinvey, $ionicSlideBoxDelegate, $sce, $http, $ionicPopup, $ionicPopover, $ionicLoading, $route) ->
+    # Setup the loader
+    $ionicLoading.show
+        content: "Loading"
+        animation: "fade-in"
+        showBackdrop: true
+        showDelay: 0
+    $scope.templates = [{ name: 'navbar.html', url: '_partials/navbar.html'}]
+    $scope.back_button = true
+    $ionicSlideBoxDelegate.update()
+    
+    $scope.activeuser = $kinvey.getActiveUser()
+    $scope.selectedIndex = -1
+    book_id = $location.path().split("/")[2]
+    page_num = $location.path().split("/")[3]
+
+    query = $kinvey.DataStore.get("books", book_id)
+    query.then (book) ->
+        $scope.book = book
+        $scope.page = book.pages[page_num]
+        $scope.text = $scope.page.text
+        $scope.page_num = page_num
+        console.log $scope.page
+        $ionicLoading.hide()
+        $scope.showPopup = (image) ->
+            tempate_string = '<img src="' + image + '" width="100%">'
+            alertPopup = $ionicPopup.alert(
+                template: tempate_string
+                buttons: [
+                    {
+                        text: "<strong>OK</strong>"
+                        type: "button-balanced"
+                    }
+                ]
+            )
+        $scope.savePage = ->
+            page_image = $scope.myFile
+            if page_image
+                delete_page_image_promise = $kinvey.File.destroy(book.pages[page_num].image._id)
+                upload_promise = $kinvey.File.upload(page_image,
+                    mimeType: "image/jpeg"
+                    size: page_image.size
+                )
+                upload_promise.then (file) ->
+                    book.pages[page_num].image = 
+                        _id: file._id
+                        _type: "KinveyFile"
+                    book.pages[page_num].text = $scope.text
+                    updated_page_promise = $kinvey.DataStore.save('books', book)
+                    updated_page_promise.then (page) ->
+                        $route.reload()
+            else
+                book.pages[page_num].text = $scope.text
+                updated_page_promise = $kinvey.DataStore.save('books', book)
+                updated_page_promise.then (page) ->
+                    $route.reload()
+        $scope.deletePage = ->
+            delete_page_image_promise = $kinvey.File.destroy(book.pages[page_num].image._id)
+            book.pages.splice(page_num, 1)
+            delete_page_promise = $kinvey.DataStore.save('books', book)
+            delete_page_promise.then (book) ->
+                if book.pages.length > 0
+                    $route.reload()
+                else
+                    $location.path("/edit/"+book_id)
+    ]
+
 app.controller "EditCtrl", [
   "$scope"
   "$location"
@@ -453,7 +538,7 @@ app.controller "EditCtrl", [
     book_id = $location.path().split("/")[2]
     query = $kinvey.DataStore.get("books", book_id)
     query.then (book) ->
-        $scope.book_id = book._id
+        $scope.book = book
         $scope.pages = book.pages
         $ionicSlideBoxDelegate.update()
         $scope.uploadFile = (page_index) ->

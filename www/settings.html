@@ -25,14 +25,14 @@
 			<button type="submit" class="button button-block button-balanced">
 				<strong> Save </strong>
 			</button>
+			<a class="button button-clear button-positive" href="#/admin">
+				<strong>
+					Edit Your Books
+				</strong>
+			</a>
 			<button ng-click="logout()" class="button button-clear button-dark logout-button">
 				Logout
 			</button>
 		</div>
-		<a ng-if="activeuser.role=='admin'" class="assertive admin-link" href="#/admin">
-			<strong>
-				Admin capabilities
-			</strong>
-		</a>
 	</form>
 </ion-content>
