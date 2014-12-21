@@ -296,7 +296,8 @@ app.controller "NewPageCtrl", [
         return
 
     call = (text) ->
-        $scope.text = text
+        $scope.text = text.replace(/\b[-.,()&$#!'\[\]{}_ /\n%"]+\B|\B[-.,()&$#!'\[\]{}_ /|%"]/g, "").trim()
+        console.log $scope.text
         return text
 
     $scope.file_changed = (element, s) ->
@@ -317,7 +318,7 @@ app.controller "NewPageCtrl", [
     $scope.activeuser = $kinvey.getActiveUser()
     if($scope.activeuser)
         $scope.uploadPage = ->
-            console.log $scope.text.replace('/\b[-.,()&$#!\[\]{}_ /\n%"]+\B|\B[-.,()&$#!\[\]{}_ /|%"]/g', "").trim()
+            # console.log $scope.text.
             # console.log $scope.text
             $scope.stage = $scope.stage + 1
 

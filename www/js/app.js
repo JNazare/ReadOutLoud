@@ -344,7 +344,8 @@
         reader.readAsDataURL(file);
       };
       call = function(text) {
-        $scope.text = text;
+        $scope.text = text.replace(/\b[-.,()&$#!'\[\]{}_ /\n%"]+\B|\B[-.,()&$#!'\[\]{}_ /|%"]/g, "").trim();
+        console.log($scope.text);
         return text;
       };
       $scope.file_changed = function(element, s) {
@@ -366,7 +367,6 @@
       $scope.activeuser = $kinvey.getActiveUser();
       if ($scope.activeuser) {
         $scope.uploadPage = function() {
-          console.log($scope.text.replace('/\b[-.,()&$#!\[\]{}_ /\n%"]+\B|\B[-.,()&$#!\[\]{}_ /|%"]/g', "").trim());
           return $scope.stage = $scope.stage + 1;
         };
         return $scope.uploadFile = function() {
