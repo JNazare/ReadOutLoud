@@ -121,6 +121,7 @@ app.controller("SignupCtrl", ($scope, $kinvey, $location) ->
             email: $scope.email
             speed: 0.1
             role: "user"
+            run_ocr: false
         )
         promise.then (activeUser) ->
             $scope.activeuser = activeUser
@@ -146,7 +147,8 @@ app.controller("SettingsCtrl", ($scope, $kinvey, $location, $rootScope, $ionicLo
     $scope.submit = ->
         $scope.activeuser.nativelang = $scope.currentLanguage._id
         $scope.activeuser.speed = Number($scope.activeuser.speed)
-        $scope.activeuser.run_ocr = $scope.ocr
+        $scope.activeuser.run_ocr = $scope.activeuser.run_ocr
+        console.log $scope.activeuser.run_ocr
         promise = $kinvey.User.update($scope.activeuser)
         promise.then (activeUser) ->
             $rootScope.back()
@@ -266,10 +268,16 @@ app.controller "NewPageCtrl", [
 
     OCRImage = (image) ->
         canvas = document.createElement("canvas")
-        canvas.width = image.naturalWidth
-        canvas.height = image.naturalHeight
-        canvas.getContext("2d").drawImage image, 0, 0
-        OCRAD canvas
+        canvas_width = image.naturalWidth
+        canvas_height = image.naturalHeight
+        if image.naturalWidth > 1500
+            canvas_width = 1500
+            canvas_height = (canvas_width * image.naturalHeight)/image.naturalWidth
+        canvas.width = canvas_width
+        canvas.height = canvas_height
+        ctx = canvas.getContext("2d")
+        ctx.drawImage(image, 0, 0, image.naturalWidth, image.naturalHeight, 0, 0, canvas_width, canvas_height)
+        OCRAD ctx
       
     OCRPath = (url, callback) ->
         image = new Image()
@@ -293,7 +301,7 @@ app.controller "NewPageCtrl", [
 
     $scope.file_changed = (element, s) ->
         $scope.text=""
-        if ($scope.activeuser.ocr==true)
+        if ($scope.activeuser.run_ocr==true)
             text = OCRFile(element.files[0], call)
         $scope.myFile = element.files[0]
         selectedFile = element.files[0]
@@ -309,11 +317,12 @@ app.controller "NewPageCtrl", [
     $scope.activeuser = $kinvey.getActiveUser()
     if($scope.activeuser)
         $scope.uploadPage = ->
-            console.log $scope.text
+            console.log $scope.text.replace('/\b[-.,()&$#!\[\]{}_ /\n%"]+\B|\B[-.,()&$#!\[\]{}_ /|%"]/g', "").trim()
+            # console.log $scope.text
             $scope.stage = $scope.stage + 1
 
         $scope.uploadFile = ->
-            console.log $scope
+            # console.log $scope
             $ionicLoading.show
                 content: "Loading"
                 animation: "fade-in"
@@ -325,7 +334,7 @@ app.controller "NewPageCtrl", [
                 size: cover_image.size
             )
             upload_promise.then (file) ->
-                console.log $scope.text
+                # console.log $scope.text
                 new_page = 
                     text: $scope.text
                     image: 

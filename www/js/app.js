@@ -133,7 +133,8 @@
         nativelang: $scope.nativelang,
         email: $scope.email,
         speed: 0.1,
-        role: "user"
+        role: "user",
+        run_ocr: false
       });
       return promise.then(function(activeUser) {
         $scope.activeuser = activeUser;
@@ -167,7 +168,8 @@
     $scope.submit = function() {
       $scope.activeuser.nativelang = $scope.currentLanguage._id;
       $scope.activeuser.speed = Number($scope.activeuser.speed);
-      $scope.activeuser.run_ocr = $scope.ocr;
+      $scope.activeuser.run_ocr = $scope.activeuser.run_ocr;
+      console.log($scope.activeuser.run_ocr);
       promise = $kinvey.User.update($scope.activeuser);
       return promise.then(function(activeUser) {
         return $rootScope.back();
@@ -311,12 +313,19 @@
       $scope.text = "";
       $scope.stage = 0;
       OCRImage = function(image) {
-        var canvas;
+        var canvas, canvas_height, canvas_width, ctx;
         canvas = document.createElement("canvas");
-        canvas.width = image.naturalWidth;
-        canvas.height = image.naturalHeight;
-        canvas.getContext("2d").drawImage(image, 0, 0);
-        return OCRAD(canvas);
+        canvas_width = image.naturalWidth;
+        canvas_height = image.naturalHeight;
+        if (image.naturalWidth > 1500) {
+          canvas_width = 1500;
+          canvas_height = (canvas_width * image.naturalHeight) / image.naturalWidth;
+        }
+        canvas.width = canvas_width;
+        canvas.height = canvas_height;
+        ctx = canvas.getContext("2d");
+        ctx.drawImage(image, 0, 0, image.naturalWidth, image.naturalHeight, 0, 0, canvas_width, canvas_height);
+        return OCRAD(ctx);
       };
       OCRPath = function(url, callback) {
         var image;
@@ -341,7 +350,7 @@
       $scope.file_changed = function(element, s) {
         var imgtag, reader, selectedFile, text;
         $scope.text = "";
-        if ($scope.activeuser.ocr === true) {
+        if ($scope.activeuser.run_ocr === true) {
           text = OCRFile(element.files[0], call);
         }
         $scope.myFile = element.files[0];
@@ -357,12 +366,11 @@
       $scope.activeuser = $kinvey.getActiveUser();
       if ($scope.activeuser) {
         $scope.uploadPage = function() {
-          console.log($scope.text);
+          console.log($scope.text.replace('/\b[-.,()&$#!\[\]{}_ /\n%"]+\B|\B[-.,()&$#!\[\]{}_ /|%"]/g', "").trim());
           return $scope.stage = $scope.stage + 1;
         };
         return $scope.uploadFile = function() {
           var cover_image, upload_promise;
-          console.log($scope);
           $ionicLoading.show({
             content: "Loading",
             animation: "fade-in",
@@ -376,7 +384,6 @@
           });
           upload_promise.then(function(file) {
             var book_id, new_page, query;
-            console.log($scope.text);
             new_page = {
               text: $scope.text,
               image: {
