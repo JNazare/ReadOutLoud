@@ -32,6 +32,8 @@ p{
 	border: 1px solid #ddd;;
 	min-height: 100%;
 	overflow: visible !important;
+	padding-bottom: 36px;
+	background-color: #f5f5f5;
 }
 
 a.no_decoration{
@@ -112,6 +114,7 @@ button.button-balanced:active{
 	font-size: 20px !important;
 	line-height: 150%;
 	padding: 20px;
+	margin-bottom: 0px;
 }
 
 .page-card{
@@ -121,6 +124,7 @@ button.button-balanced:active{
 	padding: 0px !important;
 	background-color: #f5f5f5;
 	padding-top: 15px;
+	padding-bottom: 30px;
 
 }
 
@@ -161,13 +165,16 @@ button.button-balanced:active{
 
 .audio-button{
 	position:absolute;
-	bottom: -10px;
+	bottom: -75px;
 	margin: 0px !important;
 	font-size: 20px !important;
 	border: 0px !important;
 	border-top: 1px solid rgb(73, 143, 36);
 	border-radius: 0px !important;
+	padding-bottom: 10px;
+	padding-top: 10px;
 	/*color: #66cc33 !important;*/
+	box-shadow: 0 1px 2px rgba(0, 0, 0, 0.1)
 }
 
 .settings-button{
@@ -188,7 +195,7 @@ button.button-balanced:active{
 }*/
 
 .selected-class-name {
-  color: #4a87ee;
+  /*color: #4a87ee;*/
 }
 
 .spokenWord{
@@ -253,4 +260,15 @@ button.button-balanced:active{
 	float: right;
 	margin-right: -20px;
 	margin-top: -20px;
+}
+
+.paragraph_style{
+	font-size: 20px !important;
+	line-height: 150%;
+	padding-left: 20px;
+	padding-right: 20px;
+}
+
+.paragraph_style:not(:last-child){
+	padding-bottom: 30px;	
 }

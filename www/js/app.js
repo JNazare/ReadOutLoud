@@ -169,7 +169,6 @@
       $scope.activeuser.nativelang = $scope.currentLanguage._id;
       $scope.activeuser.speed = Number($scope.activeuser.speed);
       $scope.activeuser.run_ocr = $scope.activeuser.run_ocr;
-      console.log($scope.activeuser.run_ocr);
       promise = $kinvey.User.update($scope.activeuser);
       return promise.then(function(activeUser) {
         return $rootScope.back();
@@ -345,7 +344,6 @@
       };
       call = function(text) {
         $scope.text = text.replace(/\b[-.,()&$#!'\[\]{}_ /\n%"]+\B|\B[-.,()&$#!'\[\]{}_ /|%"]/g, "").trim();
-        console.log($scope.text);
         return text;
       };
       $scope.file_changed = function(element, s) {
@@ -433,12 +431,28 @@
       query = $kinvey.DataStore.get("books", book_id);
       query.then(function(book) {
         var new_pages, promise;
+        book.pages.unshift({
+          text: 'Slide right to start reading "' + book.title + '"'
+        });
+        book.pages.push({
+          text: "The End"
+        });
         new_pages = [];
         angular.forEach(book.pages, function(page) {
+          var new_paragraphs, paragraph, paragraphs, _i, _len;
+          paragraphs = page.text.split("\n");
+          new_paragraphs = [];
+          for (_i = 0, _len = paragraphs.length; _i < _len; _i++) {
+            paragraph = paragraphs[_i];
+            paragraph = paragraph.split(" ");
+            if (paragraph.length > 1) {
+              new_paragraphs.push(paragraph);
+            }
+          }
           return new_pages.push({
             image: page.image,
             text: page.text,
-            listed_text: page.text.split(" ")
+            listed_text: new_paragraphs
           });
         });
         $scope.pages = new_pages;
@@ -465,7 +479,6 @@
         };
         $scope.clickMe = function(clickEvent) {
           var speech, text;
-          console.log('here');
           text = $scope.pages[clickEvent].text;
           speech = speakText(text, 'en-us', $scope.activeuser.speed);
           return window.speechSynthesis.speak(speech);
@@ -536,7 +549,6 @@
         $scope.page = book.pages[page_num];
         $scope.text = $scope.page.text;
         $scope.page_num = Number(page_num) + 1;
-        console.log($scope.page);
         $ionicLoading.hide();
         $scope.showPopup = function(image) {
           var alertPopup, tempate_string;
@@ -604,7 +616,6 @@
       ];
       $scope.back_button = true;
       $scope.activeuser = $kinvey.getActiveUser();
-      console.log($scope.activeuser);
       $ionicSlideBoxDelegate.update();
       book_id = $location.path().split("/")[2];
       query = $kinvey.DataStore.get("books", book_id);
