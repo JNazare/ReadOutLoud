@@ -2,26 +2,25 @@
 <ion-content class="has-header">
 	<form name="newPageForm" ng-controller="NewPageCtrl" class="new-page-form">
 		<div class="list list-inset">
-			<div class="list">
-				<label class="item item-input">
-					<input name="text" ng-model="text" type="text" placeholder="Insert text..." required>
+				<div ng-if="stage==0"  class="item item-divider">
+					Image of Page
+				</div>
+				<div ng-if="stage==1"  class="item item-divider">
+					Add Text
+				</div>
+				<label ng-if="stage==0" class="item item-input">
+					<input type="file" file-model="myFile"  accept="image/*" resize-max-height="300" resize-max-width="250" resize-quality="0.1" onchange="angular.element(this).scope().file_changed(this)"/>
+					<img id="myimage" ng-if="stage==0" width="100%">
 				</label>
-				<label class="item item-input">
-					<input type="file" file-model="myFile"  accept="image/*" resize-max-height="300" resize-max-width="250" resize-quality="0.5" />
+				<label ng-if="stage==1" class="item item-input">
+					<textarea name="text" cols="100" rows="5" ng-model="$parent.text"></textarea>
 				</label>
-				<label class="item item-toggle">
-				Insert at End
-				<label class="toggle">
-					 <input type="checkbox" ng-model="at_end">
-					 <div class="track">
-						 <div class="handle"></div>
-					 </div>
-				</label>
-				</label>
-			</div>
-			<button ng-click="uploadFile()" class="button button-block button-stable">
-				Add Page
-			</button>
+				<button ng-if="stage==0" ng-click="uploadPage()" class="button button-block button-stable">
+					Upload Image
+				</button>
+				<button ng-if="stage==1" ng-click="uploadFile()" class="button button-block button-balanced">
+					Upload Page
+				</button>
 		</div>
 	</form>
 </ion-content>

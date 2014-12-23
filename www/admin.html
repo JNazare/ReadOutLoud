@@ -3,7 +3,7 @@
 	<div class="list">
 		<ion-item class="library-list" ng-repeat="book in books">
 			<button class="button button-assertive button-clear delete-book-button" ng-click="deleteBook(book)">
-				Delete
+				<icon class="icon ion-trash-a"></icon>
 			</button>
 			<h3>{{book.title}}</h3>
 			<p>by {{book.author}}</p>
@@ -15,7 +15,7 @@
 		</ion-item>
 		<a class="no_decoration" href="#/new_book">
 			<button class="button button-full button-balanced">
-				Add New Book
+				+ New Book
 			</button>
 		</a>
 	</div>

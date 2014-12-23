@@ -1,5 +1,10 @@
 <ion-header-bar class="bar-dark navbar-color" ng-include="templates[0].url"></ion-header-bar>
 <ion-content class="has-header">
+	<div class="list card item item-image add-book-button">
+		<a class="no_decoration add-book-link" href="#/new_book">
+			+ Add your own books
+		</a>
+	</div>
 	<div class="list card" ng-repeat="book in books" ng-if="book.pages">
 		<div class="item item-image">
 			<a href="#/book/{{book._id}}">
@@ -8,7 +13,7 @@
 		</div>
 		<a class="no_decoration" href="#/book/{{book._id}}">
 			<button class="button button-block button-balanced start-reading">
-				<strong> Start Reading </strong>
+				Start Reading
 			</button>
 		</a>
 	</div>

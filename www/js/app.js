@@ -2,11 +2,24 @@
 (function() {
   var app, selectActiveLanguage, speakText;
 
-  app = angular.module("storyteller", ["ionic", "ngRoute", "kinvey"]);
+  app = angular.module("storyteller", ["ionic", "ngRoute", "kinvey", "base64"]);
 
   app.config(function($compileProvider) {
     $compileProvider.aHrefSanitizationWhitelist(/^\s*(https?|ftp|mailto|file|tel):/);
   });
+
+  app.config(function($sceDelegateProvider) {
+    $sceDelegateProvider.resourceUrlWhitelist(["self", "http://0.0.0.0:3000/**"]);
+  });
+
+  app.config([
+    "$httpProvider", function($httpProvider) {
+      $httpProvider.defaults.headers.common = {};
+      $httpProvider.defaults.headers.post = {};
+      $httpProvider.defaults.headers.put = {};
+      return $httpProvider.defaults.headers.patch = {};
+    }
+  ]);
 
   app.config(function($routeProvider, $locationProvider) {
     $routeProvider.when("/", {
@@ -40,6 +53,10 @@
     $routeProvider.when("/edit/:book_id", {
       templateUrl: "edit.html",
       controller: "EditCtrl"
+    });
+    $routeProvider.when("/edit_page/:book_id/:page_num", {
+      templateUrl: "edit_page.html",
+      controller: "EditPageCtrl"
     });
     $routeProvider.when("/new_page/:book_id/:after", {
       templateUrl: "new_page.html",
@@ -116,7 +133,8 @@
         nativelang: $scope.nativelang,
         email: $scope.email,
         speed: 0.1,
-        role: "user"
+        role: "user",
+        run_ocr: false
       });
       return promise.then(function(activeUser) {
         $scope.activeuser = activeUser;
@@ -150,6 +168,7 @@
     $scope.submit = function() {
       $scope.activeuser.nativelang = $scope.currentLanguage._id;
       $scope.activeuser.speed = Number($scope.activeuser.speed);
+      $scope.activeuser.run_ocr = $scope.activeuser.run_ocr;
       promise = $kinvey.User.update($scope.activeuser);
       return promise.then(function(activeUser) {
         return $rootScope.back();
@@ -200,7 +219,7 @@
   });
 
   app.controller("AdminCtrl", function($scope, $kinvey, $location, $route) {
-    var query;
+    var promise, query;
     $scope.templates = [
       {
         name: 'navbar.html',
@@ -210,8 +229,12 @@
     $scope.back_button = true;
     $scope.activeuser = $kinvey.getActiveUser();
     if ($scope.activeuser) {
-      query = $kinvey.DataStore.find("books");
-      query.then(function(books) {
+      query = new $kinvey.Query();
+      if ($scope.activeuser.role === "user") {
+        query.equalTo('creator', $scope.activeuser._id);
+      }
+      promise = $kinvey.DataStore.find("books", query);
+      promise.then(function(books) {
         $scope.books = books;
         $scope.deleteBook = function(book) {
           var delete_book_promise, delete_cover_promise, delete_file_id, delete_file_promise, i;
@@ -262,10 +285,11 @@
                 _type: "KinveyFile",
                 _id: file._id
               },
-              created_by: $scope.activeuser._id
+              creator: $scope.activeuser._id,
+              pages: []
             });
             return page_promise.then(function(book) {
-              return $location.path("/admin");
+              return $location.path("/edit/" + book._id);
             });
           });
         };
@@ -276,7 +300,8 @@
   ]);
 
   app.controller("NewPageCtrl", [
-    "$scope", "$kinvey", "fileUpload", "$location", function($scope, $kinvey, $fileUpload, $location) {
+    "$scope", "$kinvey", "fileUpload", "$location", "$http", "$base64", "$ionicLoading", function($scope, $kinvey, $fileUpload, $location, $http, $base64, $ionicLoading) {
+      var OCRFile, OCRImage, OCRPath, call;
       $scope.templates = [
         {
           name: 'navbar.html',
@@ -284,10 +309,72 @@
         }
       ];
       $scope.back_button = true;
+      $scope.text = "";
+      $scope.stage = 0;
+      OCRImage = function(image) {
+        var canvas, canvas_height, canvas_width, ctx;
+        canvas = document.createElement("canvas");
+        canvas_width = image.naturalWidth;
+        canvas_height = image.naturalHeight;
+        if (image.naturalWidth > 1500) {
+          canvas_width = 1500;
+          canvas_height = (canvas_width * image.naturalHeight) / image.naturalWidth;
+        }
+        canvas.width = canvas_width;
+        canvas.height = canvas_height;
+        ctx = canvas.getContext("2d");
+        ctx.drawImage(image, 0, 0, image.naturalWidth, image.naturalHeight, 0, 0, canvas_width, canvas_height);
+        return OCRAD(ctx);
+      };
+      OCRPath = function(url, callback) {
+        var image;
+        image = new Image();
+        image.src = url;
+        image.onload = function() {
+          callback(OCRImage(image));
+        };
+      };
+      OCRFile = function(file, callback) {
+        var reader;
+        reader = new FileReader();
+        reader.onload = function() {
+          OCRPath(reader.result, callback);
+        };
+        reader.readAsDataURL(file);
+      };
+      call = function(text) {
+        $scope.text = text.replace(/\b[-.,()&$#!'\[\]{}_ /\n%"]+\B|\B[-.,()&$#!'\[\]{}_ /|%"]/g, "").trim();
+        return text;
+      };
+      $scope.file_changed = function(element, s) {
+        var imgtag, reader, selectedFile, text;
+        $scope.text = "";
+        if ($scope.activeuser.run_ocr === true) {
+          text = OCRFile(element.files[0], call);
+        }
+        $scope.myFile = element.files[0];
+        selectedFile = element.files[0];
+        reader = new FileReader();
+        imgtag = document.getElementById("myimage");
+        imgtag.title = selectedFile.name;
+        reader.onload = function(event) {
+          imgtag.src = event.target.result;
+        };
+        reader.readAsDataURL(selectedFile);
+      };
       $scope.activeuser = $kinvey.getActiveUser();
       if ($scope.activeuser) {
+        $scope.uploadPage = function() {
+          return $scope.stage = $scope.stage + 1;
+        };
         return $scope.uploadFile = function() {
           var cover_image, upload_promise;
+          $ionicLoading.show({
+            content: "Loading",
+            animation: "fade-in",
+            showBackdrop: true,
+            showDelay: 0
+          });
           cover_image = $scope.myFile;
           upload_promise = $kinvey.File.upload(cover_image, {
             mimeType: "image/jpeg",
@@ -305,21 +392,13 @@
             book_id = $location.path().split("/")[2];
             query = $kinvey.DataStore.get("books", book_id);
             return query.then(function(book) {
-              var page_index, page_promise;
-              if ($scope.at_end) {
-                book.pages.push(new_page);
-                page_promise = $kinvey.DataStore.save("books", book);
-                return page_promise.then(function(book) {
-                  return $location.path("/edit/" + book_id);
-                });
-              } else {
-                page_index = $location.path().split("/")[3];
-                book.pages.splice(page_index, 0, new_page);
-                page_promise = $kinvey.DataStore.save("books", book);
-                return page_promise.then(function(book) {
-                  return $location.path("/edit/" + book_id);
-                });
-              }
+              var page_promise;
+              book.pages.push(new_page);
+              page_promise = $kinvey.DataStore.save("books", book);
+              return page_promise.then(function(book) {
+                $location.path("/edit/" + book_id);
+                return $ionicLoading.hide();
+              });
             });
           });
         };
@@ -352,12 +431,28 @@
       query = $kinvey.DataStore.get("books", book_id);
       query.then(function(book) {
         var new_pages, promise;
+        book.pages.unshift({
+          text: 'Slide right to start reading "' + book.title + '"'
+        });
+        book.pages.push({
+          text: "The End"
+        });
         new_pages = [];
         angular.forEach(book.pages, function(page) {
+          var new_paragraphs, paragraph, paragraphs, _i, _len;
+          paragraphs = page.text.split("\n");
+          new_paragraphs = [];
+          for (_i = 0, _len = paragraphs.length; _i < _len; _i++) {
+            paragraph = paragraphs[_i];
+            paragraph = paragraph.split(" ");
+            if (paragraph.length > 1) {
+              new_paragraphs.push(paragraph);
+            }
+          }
           return new_pages.push({
             image: page.image,
             text: page.text,
-            listed_text: page.text.split(" ")
+            listed_text: new_paragraphs
           });
         });
         $scope.pages = new_pages;
@@ -384,7 +479,6 @@
         };
         $scope.clickMe = function(clickEvent) {
           var speech, text;
-          console.log('here');
           text = $scope.pages[clickEvent].text;
           speech = speakText(text, 'en-us', $scope.activeuser.speed);
           return window.speechSynthesis.speak(speech);
@@ -428,6 +522,89 @@
     }
   ]);
 
+  app.controller("EditPageCtrl", [
+    "$scope", "$location", "$kinvey", "$ionicSlideBoxDelegate", "$sce", "$http", "$ionicPopup", "$ionicPopover", "$ionicLoading", "$route", function($scope, $location, $kinvey, $ionicSlideBoxDelegate, $sce, $http, $ionicPopup, $ionicPopover, $ionicLoading, $route) {
+      var book_id, page_num, query;
+      $ionicLoading.show({
+        content: "Loading",
+        animation: "fade-in",
+        showBackdrop: true,
+        showDelay: 0
+      });
+      $scope.templates = [
+        {
+          name: 'navbar.html',
+          url: '_partials/navbar.html'
+        }
+      ];
+      $scope.back_button = true;
+      $ionicSlideBoxDelegate.update();
+      $scope.activeuser = $kinvey.getActiveUser();
+      $scope.selectedIndex = -1;
+      book_id = $location.path().split("/")[2];
+      page_num = $location.path().split("/")[3];
+      query = $kinvey.DataStore.get("books", book_id);
+      return query.then(function(book) {
+        $scope.book = book;
+        $scope.page = book.pages[page_num];
+        $scope.text = $scope.page.text;
+        $scope.page_num = Number(page_num) + 1;
+        $ionicLoading.hide();
+        $scope.showPopup = function(image) {
+          var alertPopup, tempate_string;
+          tempate_string = '<img src="' + image + '" width="100%">';
+          return alertPopup = $ionicPopup.alert({
+            template: tempate_string,
+            buttons: [
+              {
+                text: "<strong>OK</strong>",
+                type: "button-balanced"
+              }
+            ]
+          });
+        };
+        $scope.savePage = function() {
+          var delete_page_image_promise, page_image, updated_page_promise, upload_promise;
+          page_image = $scope.myFile;
+          if (page_image) {
+            delete_page_image_promise = $kinvey.File.destroy(book.pages[page_num].image._id);
+            upload_promise = $kinvey.File.upload(page_image, {
+              mimeType: "image/jpeg",
+              size: page_image.size
+            });
+            return upload_promise.then(function(file) {
+              var updated_page_promise;
+              book.pages[page_num].image = {
+                _id: file._id,
+                _type: "KinveyFile"
+              };
+              book.pages[page_num].text = $scope.text;
+              updated_page_promise = $kinvey.DataStore.save('books', book);
+              return updated_page_promise.then(function(page) {
+                return $route.reload();
+              });
+            });
+          } else {
+            book.pages[page_num].text = $scope.text;
+            updated_page_promise = $kinvey.DataStore.save('books', book);
+            return updated_page_promise.then(function(page) {
+              return $route.reload();
+            });
+          }
+        };
+        return $scope.deletePage = function() {
+          var delete_page_image_promise, delete_page_promise;
+          delete_page_image_promise = $kinvey.File.destroy(book.pages[page_num].image._id);
+          book.pages.splice(page_num, 1);
+          delete_page_promise = $kinvey.DataStore.save('books', book);
+          return delete_page_promise.then(function(book) {
+            return $location.path("/edit/" + book_id);
+          });
+        };
+      });
+    }
+  ]);
+
   app.controller("EditCtrl", [
     "$scope", "$location", "$kinvey", "$ionicSlideBoxDelegate", "$sce", "$http", "fileUpload", "$route", "$filter", function($scope, $location, $kinvey, $ionicSlideBoxDelegate, $sce, $http, $fileUpload, $route, $filter) {
       var book_id, query;
@@ -443,7 +620,7 @@
       book_id = $location.path().split("/")[2];
       query = $kinvey.DataStore.get("books", book_id);
       query.then(function(book) {
-        $scope.book_id = book._id;
+        $scope.book = book;
         $scope.pages = book.pages;
         $ionicSlideBoxDelegate.update();
         $scope.uploadFile = function(page_index) {

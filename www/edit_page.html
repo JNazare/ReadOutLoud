@@ -1,0 +1,27 @@
+<ion-header-bar class="bar-dark navbar-color" ng-include="templates[0].url"></ion-header-bar>
+<ion-content class="has-header">
+	<div ng-controller="EditPageCtrl" class="list card book-card">
+		<div class="item item-divider page-thumbnail-holder">
+			<div class="row">
+				<div class="col col-center word">
+				</div>
+				<div class="col thumbnail-div">
+					<img class="page-thumbnail-image" ng-src="{{page.image._downloadURL}}">
+					<div class="overlay" ng-click="showPopup(page.image._downloadURL)">
+						<p class="page_number">{{page_num}}</p>
+					</div>
+				</div>
+			</div>
+		</div>
+		<div class="item item-text-wrap page-card">
+			<textarea class="edit-text" name="text" cols="30" rows="5" ng-model="text" ng-init="text=page.text"></textarea>
+			<button class="button button-block button-balanced audio-button" ng-click="savePage()">
+				<strong> SAVE </strong>
+			</button>
+			<br><br>
+		</div>
+	</div>
+	<button class="button button-assertive button-clear delete-page-button" ng-click="deletePage()">
+		Delete Page
+	</button>
+</ion-content>

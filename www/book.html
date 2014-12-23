@@ -8,18 +8,20 @@
 						<div class="col col-center word">
 						</div>
 						<div class="col thumbnail-div">
-							<img class="page-thumbnail-image" ng-src="{{page.image._downloadURL}}">
-							<div class="overlay" ng-click="showPopup(page.image._downloadURL)">
-								<p class="page_number">{{$index+1}}</p>
+							<img ng-if="$index!=0 && $index!=pages.length-1" class="page-thumbnail-image" ng-src="{{page.image._downloadURL}}">
+							<div ng-if="$index!=0 && $index!=pages.length-1" class="overlay" ng-click="showPopup(page.image._downloadURL)">
+								<p class="page_number">{{$index}}</p>
 							</div>
 						</div>
 					</div>
 				</div>
 				<div class="item item-text-wrap page-card">
 					<p id="text_js" class="reading-text">
-						<span ng-repeat="word in page.listed_text track by $index" ng-click="translateWord($event, word, $index)" ng-class="{ 'selected-class-name': $index == selectedIndex}">
-							{{word}}
-						</span>
+						<div ng-repeat="paragraph in page.listed_text" class="paragraph_style">
+							<span ng-repeat="word in paragraph track by $index" ng-click="translateWord($event, word, $index)" ng-class="{ 'selected-class-name': $index == selectedIndex}" >
+								{{word}}
+							</span>
+						</div>
 					</p>
 					<button id="audio_js" class="button button-block button-balanced audio-button" ng-click="clickMe($index)">
 						<i class="icon listen-icon ion-play"></i>
