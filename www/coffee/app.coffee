@@ -20,7 +20,7 @@ app.config ($sceDelegateProvider) ->
 app.config [
   "$httpProvider"
   ($httpProvider) ->
-    #Reset headers to avoid OPTIONS request (aka preflight)
+    # Reset headers to avoid OPTIONS request (aka preflight)
     $httpProvider.defaults.headers.common = {}
     $httpProvider.defaults.headers.post = {}
     $httpProvider.defaults.headers.put = {}
@@ -148,7 +148,6 @@ app.controller("SettingsCtrl", ($scope, $kinvey, $location, $rootScope, $ionicLo
         $scope.activeuser.nativelang = $scope.currentLanguage._id
         $scope.activeuser.speed = Number($scope.activeuser.speed)
         $scope.activeuser.run_ocr = $scope.activeuser.run_ocr
-        # console.log $scope.activeuser.run_ocr
         promise = $kinvey.User.update($scope.activeuser)
         promise.then (activeUser) ->
             $rootScope.back()
@@ -297,7 +296,6 @@ app.controller "NewPageCtrl", [
 
     call = (text) ->
         $scope.text = text.replace(/\b[-.,()&$#!'\[\]{}_ /\n%"]+\B|\B[-.,()&$#!'\[\]{}_ /|%"]/g, "").trim()
-        # console.log $scope.text
         return text
 
     $scope.file_changed = (element, s) ->
@@ -318,12 +316,9 @@ app.controller "NewPageCtrl", [
     $scope.activeuser = $kinvey.getActiveUser()
     if($scope.activeuser)
         $scope.uploadPage = ->
-            # console.log $scope.text
-            # console.log $scope.text
             $scope.stage = $scope.stage + 1
 
         $scope.uploadFile = ->
-            # console.log $scope
             $ionicLoading.show
                 content: "Loading"
                 animation: "fade-in"
@@ -335,7 +330,6 @@ app.controller "NewPageCtrl", [
                 size: cover_image.size
             )
             upload_promise.then (file) ->
-                # console.log $scope.text
                 new_page = 
                     text: $scope.text
                     image: 
@@ -366,7 +360,6 @@ app.controller "BookCtrl", [
   "$ionicPopover"
   "$ionicLoading"
   ($scope, $location, $kinvey, $ionicSlideBoxDelegate, $sce, $http, $ionicPopup, $ionicPopover, $ionicLoading) ->
-    # Setup the loader
     $ionicLoading.show
         content: "Loading"
         animation: "fade-in"
@@ -392,8 +385,6 @@ app.controller "BookCtrl", [
                 paragraph = paragraph.split(" ")
                 if paragraph.length > 1
                     new_paragraphs.push(paragraph)
-            # console.log new_paragraphs
-            # page.text = page.text.replace(/[\r\n]+/, " \n")
             new_pages.push
                 image: page.image
                 text: page.text
@@ -419,7 +410,6 @@ app.controller "BookCtrl", [
             ).error (data, status, headers, config) ->
                 return
         $scope.clickMe = (clickEvent) ->
-            # console.log 'here'
             text = $scope.pages[clickEvent].text
             speech = speakText(text, 'en-us', $scope.activeuser.speed)
             window.speechSynthesis.speak(speech)
@@ -477,7 +467,6 @@ app.controller "EditPageCtrl", [
   "$ionicLoading"
   "$route"
   ($scope, $location, $kinvey, $ionicSlideBoxDelegate, $sce, $http, $ionicPopup, $ionicPopover, $ionicLoading, $route) ->
-    # Setup the loader
     $ionicLoading.show
         content: "Loading"
         animation: "fade-in"
@@ -498,7 +487,6 @@ app.controller "EditPageCtrl", [
         $scope.page = book.pages[page_num]
         $scope.text = $scope.page.text
         $scope.page_num = Number(page_num)+1
-        # console.log $scope.page
         $ionicLoading.hide()
         $scope.showPopup = (image) ->
             tempate_string = '<img src="' + image + '" width="100%">'
@@ -554,7 +542,6 @@ app.controller "EditCtrl", [
     $scope.templates = [{ name: 'navbar.html', url: '_partials/navbar.html'}]
     $scope.back_button = true
     $scope.activeuser = $kinvey.getActiveUser()
-    # console.log $scope.activeuser
     $ionicSlideBoxDelegate.update()
     
     book_id = $location.path().split("/")[2]
@@ -648,9 +635,6 @@ selectActiveLanguage = (languages, nativelang) ->
 
 app.run ($ionicPlatform, $rootScope, $location) ->
     $ionicPlatform.ready ->
-        
-        # Hide the accessory bar by default (remove this to show the accessory bar above the keyboard
-        # for form inputs)
 
         history = []
         $rootScope.$on "$routeChangeSuccess", ->
