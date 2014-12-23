@@ -5,4 +5,4 @@ Learn English while reading with your kids. More information at [http://learn.me
 
 Contact: [juliana@media.mit.edu](mailto:juliana@media.mit.edu)
 
-2014, MIT License
+MIT License, 2014
