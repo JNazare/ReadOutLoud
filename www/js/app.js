@@ -347,11 +347,8 @@
         return text;
       };
       $scope.file_changed = function(element, s) {
-        var imgtag, reader, selectedFile, text;
+        var imgtag, reader, selectedFile;
         $scope.text = "";
-        if ($scope.activeuser.run_ocr === true) {
-          text = OCRFile(element.files[0], call);
-        }
         $scope.myFile = element.files[0];
         selectedFile = element.files[0];
         reader = new FileReader();
@@ -365,7 +362,26 @@
       $scope.activeuser = $kinvey.getActiveUser();
       if ($scope.activeuser) {
         $scope.uploadPage = function() {
-          return $scope.stage = $scope.stage + 1;
+          var upload_promise;
+          upload_promise = $kinvey.File.upload($scope.myFile, {
+            mimeType: "image/jpeg",
+            size: $scope.myFile.size,
+            _public: true
+          });
+          return upload_promise.then(function(file) {
+            var streaming_promise;
+            streaming_promise = $kinvey.File.stream(file._id);
+            return streaming_promise.then(function(downloadObj) {
+              var link;
+              console.log(encodeURIComponent(downloadObj._downloadURL));
+              link = "http://54.164.208.20/api/ocr/" + encodeURIComponent(downloadObj._downloadURL);
+              return $http.get(link).success(function(data, status, headers, config) {
+                console.log(data);
+                $scope.text = data;
+                return $scope.stage = $scope.stage + 1;
+              }).error(function(data, status, headers, config) {});
+            });
+          });
         };
         return $scope.uploadFile = function() {
           var cover_image, upload_promise;

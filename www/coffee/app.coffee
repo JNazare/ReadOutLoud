@@ -300,8 +300,8 @@ app.controller "NewPageCtrl", [
 
     $scope.file_changed = (element, s) ->
         $scope.text=""
-        if ($scope.activeuser.run_ocr==true)
-            text = OCRFile(element.files[0], call)
+        # if ($scope.activeuser.run_ocr==true)
+        #     text = OCRFile(element.files[0], call)
         $scope.myFile = element.files[0]
         selectedFile = element.files[0]
         reader = new FileReader()
@@ -316,7 +316,21 @@ app.controller "NewPageCtrl", [
     $scope.activeuser = $kinvey.getActiveUser()
     if($scope.activeuser)
         $scope.uploadPage = ->
-            $scope.stage = $scope.stage + 1
+            upload_promise = $kinvey.File.upload($scope.myFile,
+                mimeType: "image/jpeg"
+                size: $scope.myFile.size
+                _public: true
+            )
+            upload_promise.then (file) ->
+                streaming_promise = $kinvey.File.stream(file._id)
+                streaming_promise.then (downloadObj) ->
+                    console.log encodeURIComponent(downloadObj._downloadURL)
+                    link = "http://54.164.208.20/api/ocr/"+encodeURIComponent(downloadObj._downloadURL)
+                    $http.get(link).success((data, status, headers, config) ->
+                        console.log data
+                        $scope.text = data
+                        $scope.stage = $scope.stage + 1
+                    ).error (data, status, headers, config) ->
 
         $scope.uploadFile = ->
             $ionicLoading.show
