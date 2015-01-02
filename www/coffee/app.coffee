@@ -316,47 +316,50 @@ app.controller "NewPageCtrl", [
     $scope.activeuser = $kinvey.getActiveUser()
     if($scope.activeuser)
         $scope.uploadPage = ->
+            $ionicLoading.show
+                content: "Loading"
+                animation: "fade-in"
+                showBackdrop: true
+                showDelay: 0
             upload_promise = $kinvey.File.upload($scope.myFile,
                 mimeType: "image/jpeg"
                 size: $scope.myFile.size
                 _public: true
             )
             upload_promise.then (file) ->
-                streaming_promise = $kinvey.File.stream(file._id)
+                $scope.imageId = file._id
+                streaming_promise = $kinvey.File.stream($scope.imageId)
                 streaming_promise.then (downloadObj) ->
-                    console.log encodeURIComponent(downloadObj._downloadURL)
-                    link = "http://54.164.208.20/api/ocr/"+encodeURIComponent(downloadObj._downloadURL)
-                    $http.get(link).success((data, status, headers, config) ->
-                        console.log data
-                        $scope.text = data
+                    if ($scope.activeuser.run_ocr==true)
+                        # console.log encodeURIComponent(downloadObj._downloadURL)
+                        link = "http://54.164.208.20/api/ocr/"+encodeURIComponent(downloadObj._downloadURL)
+                        $http.get(link).success((data, status, headers, config) ->
+                            console.log data
+                            $scope.text = data.trim()#.replace(/(\r\n|\n|\r)/gm," ")
+                            $scope.stage = $scope.stage + 1
+                            $ionicLoading.hide()
+                        ).error (data, status, headers, config) ->
+                            $ionicLoading.hide()
+                            return
+                    else
                         $scope.stage = $scope.stage + 1
-                    ).error (data, status, headers, config) ->
+                        $ionicLoading.hide()
+                        return
 
         $scope.uploadFile = ->
-            $ionicLoading.show
-                content: "Loading"
-                animation: "fade-in"
-                showBackdrop: true
-                showDelay: 0
-            cover_image = $scope.myFile
-            upload_promise = $kinvey.File.upload(cover_image,
-                mimeType: "image/jpeg"
-                size: cover_image.size
-            )
-            upload_promise.then (file) ->
-                new_page = 
-                    text: $scope.text
-                    image: 
-                        _type: "KinveyFile"
-                        _id: file._id
-                book_id = $location.path().split("/")[2]
-                query = $kinvey.DataStore.get("books", book_id)
-                query.then (book) ->
-                    book.pages.push(new_page)
-                    page_promise = $kinvey.DataStore.save("books", book)
-                    page_promise.then (book) ->
-                        $location.path("/edit/"+book_id)
-                        $ionicLoading.hide()
+            new_page = 
+                text: $scope.text
+                image: 
+                    _type: "KinveyFile"
+                    _id: $scope.imageId
+            book_id = $location.path().split("/")[2]
+            query = $kinvey.DataStore.get("books", book_id)
+            query.then (book) ->
+                book.pages.push(new_page)
+                page_promise = $kinvey.DataStore.save("books", book)
+                page_promise.then (book) ->
+                    $location.path("/edit/"+book_id)
+                    $ionicLoading.hide()
             return
     else
         $location.path("/login")

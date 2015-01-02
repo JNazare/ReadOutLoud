@@ -363,6 +363,12 @@
       if ($scope.activeuser) {
         $scope.uploadPage = function() {
           var upload_promise;
+          $ionicLoading.show({
+            content: "Loading",
+            animation: "fade-in",
+            showBackdrop: true,
+            showDelay: 0
+          });
           upload_promise = $kinvey.File.upload($scope.myFile, {
             mimeType: "image/jpeg",
             size: $scope.myFile.size,
@@ -370,51 +376,45 @@
           });
           return upload_promise.then(function(file) {
             var streaming_promise;
-            streaming_promise = $kinvey.File.stream(file._id);
+            $scope.imageId = file._id;
+            streaming_promise = $kinvey.File.stream($scope.imageId);
             return streaming_promise.then(function(downloadObj) {
               var link;
-              console.log(encodeURIComponent(downloadObj._downloadURL));
-              link = "http://54.164.208.20/api/ocr/" + encodeURIComponent(downloadObj._downloadURL);
-              return $http.get(link).success(function(data, status, headers, config) {
-                console.log(data);
-                $scope.text = data;
-                return $scope.stage = $scope.stage + 1;
-              }).error(function(data, status, headers, config) {});
+              if ($scope.activeuser.run_ocr === true) {
+                link = "http://54.164.208.20/api/ocr/" + encodeURIComponent(downloadObj._downloadURL);
+                return $http.get(link).success(function(data, status, headers, config) {
+                  console.log(data);
+                  $scope.text = data.trim().replace(/(\r\n|\n|\r)/gm, " ");
+                  $scope.stage = $scope.stage + 1;
+                  return $ionicLoading.hide();
+                }).error(function(data, status, headers, config) {
+                  $ionicLoading.hide();
+                });
+              } else {
+                $scope.stage = $scope.stage + 1;
+                $ionicLoading.hide();
+              }
             });
           });
         };
         return $scope.uploadFile = function() {
-          var cover_image, upload_promise;
-          $ionicLoading.show({
-            content: "Loading",
-            animation: "fade-in",
-            showBackdrop: true,
-            showDelay: 0
-          });
-          cover_image = $scope.myFile;
-          upload_promise = $kinvey.File.upload(cover_image, {
-            mimeType: "image/jpeg",
-            size: cover_image.size
-          });
-          upload_promise.then(function(file) {
-            var book_id, new_page, query;
-            new_page = {
-              text: $scope.text,
-              image: {
-                _type: "KinveyFile",
-                _id: file._id
-              }
-            };
-            book_id = $location.path().split("/")[2];
-            query = $kinvey.DataStore.get("books", book_id);
-            return query.then(function(book) {
-              var page_promise;
-              book.pages.push(new_page);
-              page_promise = $kinvey.DataStore.save("books", book);
-              return page_promise.then(function(book) {
-                $location.path("/edit/" + book_id);
-                return $ionicLoading.hide();
-              });
+          var book_id, new_page, query;
+          new_page = {
+            text: $scope.text,
+            image: {
+              _type: "KinveyFile",
+              _id: $scope.imageId
+            }
+          };
+          book_id = $location.path().split("/")[2];
+          query = $kinvey.DataStore.get("books", book_id);
+          query.then(function(book) {
+            var page_promise;
+            book.pages.push(new_page);
+            page_promise = $kinvey.DataStore.save("books", book);
+            return page_promise.then(function(book) {
+              $location.path("/edit/" + book_id);
+              return $ionicLoading.hide();
             });
           });
         };
